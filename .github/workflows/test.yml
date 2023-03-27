@@ -26,7 +26,6 @@ jobs:
       - name: Copy compiled binaries
         run: |
           cp -R examples/HelloWorld/build ./build
-          wget -q ${{ env.BOOT_APP0_URL }}  -O  /boot_app0.bin
           ls ./build/*.bin -la
           # normalize file names
           mv ./build/HelloWorld.ino.bin ./build/firmware.bin
