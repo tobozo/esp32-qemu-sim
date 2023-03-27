@@ -134,24 +134,6 @@ runs:
       run: ${{ github.action_path }}/run-build-in-qemu.sh
       shell: bash
 
-    # - name: Create firmware for QEmu
-    #   shell: bash
-    #   run: |
-    #     ./esptool/esptool.py --chip esp32 merge_bin --fill-flash-size ${{ inputs.flash-size }}MB -o flash_image.bin \
-    #       ${{ inputs.bootloader-address }} ${{ inputs.bootloader-bin }} \
-    #       ${{ inputs.partitions-address }} ${{ inputs.partitions-bin }} \
-    #       ${{ env.BOOT_APP0_ADDR }} ${{ inputs.boot_app0-bin }} \
-    #       ${{ env.FIRMWARE_ADDR }} ${{ inputs.firmware-bin }} \
-    #       ${{ env.SPIFFS_ADDR }} ${{ inputs.spiffs-bin }}
-    #
-    # - name: Load firmware in QEmu
-    #   # qemu-system-xtensa -nographic -no-reboot -machine esp32 -drive file=firmware.bin,if=mtd,format=raw
-    #   shell: bash
-    #   run: |
-    #     (./qemu-git/build/qemu-system-xtensa -nographic -machine esp32 -drive file=flash_image.bin,if=mtd,format=raw | tee -a ./logs.txt) &
-    #     sleep ${{ inputs.qemu-timeout }}
-    #     killall qemu-system-xtensa || true
-
     - name: Upload logs as artifact
       uses: actions/upload-artifact@v3
       with:
