@@ -24,7 +24,6 @@ jobs:
           sketch-names: HelloWorld.ino
           set-build-path: true
       - name: Copy compiled binaries
-        if: github.event_name == 'workflow_dispatch'
         run: |
           cp -R examples/HelloWorld/build ./build
           wget -q ${{ env.BOOT_APP0_URL }}  -O  /boot_app0.bin

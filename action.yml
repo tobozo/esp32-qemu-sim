@@ -32,11 +32,11 @@ runs:
   using: "composite"
   steps:
 
-    - name: Retrieve binaries (artifact)
-      uses: actions/download-artifact@v3
-      with:
-        name: Build-dir
-        path: ${{ inputs.build-folder }}
+    # - name: Retrieve binaries (artifact)
+    #   uses: actions/download-artifact@v3
+    #   with:
+    #     name: Build-dir
+    #     path: ${{ inputs.build-folder }}
 
     - name: Guess Context
       shell: bash
