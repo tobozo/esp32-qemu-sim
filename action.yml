@@ -64,6 +64,7 @@ runs:
     #     path: ${{ inputs.build-folder }}
 
     - name: Validate inputs
+      shell: bash
       run: validate.sh
       # shell: bash
       # run: |
