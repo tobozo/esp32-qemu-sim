@@ -74,13 +74,13 @@ runs:
           exit 1
         fi
 
-        if [[ ! -f "${{ inputs.partitions-csv }}" ]]; then
+        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.partitions-csv }}" ]]; then
           echo "[ERROR] Missing partitions.csv file in build folder"
           exit 1
         fi
 
         if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.otadata-bin }}" ]]; then
-          # get a copy of boot_app0.bin
+          echo "[INFO] Fetching a copy of boot_app0.bin from espressif/arduino-esp32 repository"
           wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/partitions/boot_app0.bin -O "${{ inputs.build-folder }}/${{ inputs.otadata-bin }}"
         fi
 
@@ -90,6 +90,7 @@ runs:
         fi
 
         if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.partitions-bin }} ]]; then
+          # TODO: generate partitions.bin from partitions.csv using gen_esp32part.py
           echo "[ERROR] Missing partitions.bin, check your 'partitions-bin' path
           exit 1
         fi
