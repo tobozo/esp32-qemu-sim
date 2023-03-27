@@ -64,8 +64,9 @@ runs:
     #     path: ${{ inputs.build-folder }}
 
     - name: Validate inputs
+      run: ${{ github.action_path }}/validate.sh
       shell: bash
-      run: validate.sh
+
       # shell: bash
       # run: |
       #   # TODO: validate/sanitize/restrict build-folder path
