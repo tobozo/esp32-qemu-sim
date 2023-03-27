@@ -32,77 +32,77 @@ runs:
   using: "composite"
   steps:
 
-  - name: Retrieve binaries (artifact)
-    uses: actions/download-artifact@v3
-    with:
-      name: Build-dir
-      path: ${{ inputs.build-folder }}
+    - name: Retrieve binaries (artifact)
+      uses: actions/download-artifact@v3
+      with:
+        name: Build-dir
+        path: ${{ inputs.build-folder }}
 
-  - name: Guess Context
-    run: |
-      if [[ ! -d "${{ inputs.build-folder }}" ]]; then
-        echo "[ERROR] No build folder found, aborting"
-        exit 1
-      fi
+    - name: Guess Context
+      run: |
+        if [[ ! -d "${{ inputs.build-folder }}" ]]; then
+          echo "[ERROR] No build folder found, aborting"
+          exit 1
+        fi
 
-      if [[ ! -d "${{ inputs.flash-size }}" ]]; then
-        echo "[ERROR] missing flash size property"
-        exit 1
-      fi
+        if [[ ! -d "${{ inputs.flash-size }}" ]]; then
+          echo "[ERROR] missing flash size property"
+          exit 1
+        fi
 
-      if [[ ! -d "${{ inputs.qemu-timeout }}" ]]; then
-        echo "[ERROR] missing timeout property"
-        exit 1
-      fi
+        if [[ ! -d "${{ inputs.qemu-timeout }}" ]]; then
+          echo "[ERROR] missing timeout property"
+          exit 1
+        fi
 
-      if [[ ! -f "${{ inputs.build-folder }}/partitions.csv" ]]; then
-        echo "[ERROR] missing partitions.csv file in build folder"
-        exit 1
-      fi
+        if [[ ! -f "${{ inputs.build-folder }}/partitions.csv" ]]; then
+          echo "[ERROR] missing partitions.csv file in build folder"
+          exit 1
+        fi
 
-      # get a copy of boot_app0.bin
-      wget -q ${{ env.BOOT_APP0_URL }}  -O ${{ inputs.build-folder }}/boot_app0.bin
+        # get a copy of boot_app0.bin
+        wget -q ${{ env.BOOT_APP0_URL }}  -O ${{ inputs.build-folder }}/boot_app0.bin
 
-      FLASH_SIZE=${{ inputs.flash-size }}
-      cat ${{ inputs.build-folder }}/partitions.csv
-      OLD_IFS=$IFS
-      csvdata=`cat ${{ inputs.build-folder }}/partitions.csv | tr -d ' ' | tr '\n' ';'` # remove spaces, replace \n by semicolon
-      IFS=';' read -ra rows <<< "$csvdata" # split lines
-      for index in "${!rows[@]}"
-      do
-        IFS=',' read -ra csv_columns <<< "${rows[$index]}" # split columns
-        case "${csv_columns[0]}" in
-          otadata)  BOOT_APP0_ADDR="${csv_columns[3]}" ;;
-          app0)     FIRMWARE_ADDR="${csv_columns[3]}"  ;;
-          spiffs)   SPIFFS_ADDR="${csv_columns[3]}"    ;;
-          *) echo "Ignoring ${csv_columns[0]}:${csv_columns[3]}" ;;
-        esac
-      done
-      ( set -o posix ; set ) | grep _ADDR
-      IFS=$OLD_IFS
+        FLASH_SIZE=${{ inputs.flash-size }}
+        cat ${{ inputs.build-folder }}/partitions.csv
+        OLD_IFS=$IFS
+        csvdata=`cat ${{ inputs.build-folder }}/partitions.csv | tr -d ' ' | tr '\n' ';'` # remove spaces, replace \n by semicolon
+        IFS=';' read -ra rows <<< "$csvdata" # split lines
+        for index in "${!rows[@]}"
+        do
+          IFS=',' read -ra csv_columns <<< "${rows[$index]}" # split columns
+          case "${csv_columns[0]}" in
+            otadata)  BOOT_APP0_ADDR="${csv_columns[3]}" ;;
+            app0)     FIRMWARE_ADDR="${csv_columns[3]}"  ;;
+            spiffs)   SPIFFS_ADDR="${csv_columns[3]}"    ;;
+            *) echo "Ignoring ${csv_columns[0]}:${csv_columns[3]}" ;;
+          esac
+        done
+        ( set -o posix ; set ) | grep _ADDR
+        IFS=$OLD_IFS
 
-      if [[ "$BOOT_APP0_ADDR" == "" ]]; then
-        echo "[ERROR] No otadata address found in partitions.csv"
-        exit 1
-      fi
-      if [[ "$FIRMWARE_ADDR" == "" ]]; then
-        echo "[ERROR] No ota0 address found in partitions.csv"
-        exit 1
-      fi
+        if [[ "$BOOT_APP0_ADDR" == "" ]]; then
+          echo "[ERROR] No otadata address found in partitions.csv"
+          exit 1
+        fi
+        if [[ "$FIRMWARE_ADDR" == "" ]]; then
+          echo "[ERROR] No ota0 address found in partitions.csv"
+          exit 1
+        fi
 
-      DEVICE=${{ env.DEFAULT_DEVICE }}
-      BOOTLOADER_ADDR=${{ env.DEFAULT_BOOTLOADER_ADDR }}
-      PARTITIONS_ADDR=${{ env.DEFAULT_PARTITIONS_ADDR }}
+        DEVICE=${{ env.DEFAULT_DEVICE }}
+        BOOTLOADER_ADDR=${{ env.DEFAULT_BOOTLOADER_ADDR }}
+        PARTITIONS_ADDR=${{ env.DEFAULT_PARTITIONS_ADDR }}
 
-      echo "DEVICE=$DEVICE" >> $GITHUB_ENV
-      echo "BOOTLOADER_ADDR=$BOOTLOADER_ADDR" >> $GITHUB_ENV
-      echo "PARTITIONS_ADDR=$PARTITIONS_ADDR" >> $GITHUB_ENV
-      echo "BOOT_APP0_ADDR=$BOOT_APP0_ADDR" >> $GITHUB_ENV
-      echo "FIRMWARE_ADDR=$FIRMWARE_ADDR" >> $GITHUB_ENV
-      echo "SPIFFS_ADDR=$SPIFFS_ADDR" >> $GITHUB_ENV
-      echo "FLASH_SIZE=$FLASH_SIZE" >> $GITHUB_ENV
-      # copy build folder from artifact to local folder
-      cp ${{ inputs.build-folder }}/*.bin ./
+        echo "DEVICE=$DEVICE" >> $GITHUB_ENV
+        echo "BOOTLOADER_ADDR=$BOOTLOADER_ADDR" >> $GITHUB_ENV
+        echo "PARTITIONS_ADDR=$PARTITIONS_ADDR" >> $GITHUB_ENV
+        echo "BOOT_APP0_ADDR=$BOOT_APP0_ADDR" >> $GITHUB_ENV
+        echo "FIRMWARE_ADDR=$FIRMWARE_ADDR" >> $GITHUB_ENV
+        echo "SPIFFS_ADDR=$SPIFFS_ADDR" >> $GITHUB_ENV
+        echo "FLASH_SIZE=$FLASH_SIZE" >> $GITHUB_ENV
+        # copy build folder from artifact to local folder
+        cp ${{ inputs.build-folder }}/*.bin ./
 
 
     - name: Cache QEmu build
