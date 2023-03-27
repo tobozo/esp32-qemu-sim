@@ -110,7 +110,7 @@ runs:
       id: cache-qemu
       with:
         path: './qemu-git'
-        key: ${{ runner.os }}-qemu-${{ hashFiles('**/qemu-system-xtensa') }}
+        key: qemu-system-xtensa
         restore-keys: |
           ${{ runner.os }}-qemu-
 
