@@ -1,5 +1,17 @@
 #!/bin/bash
 
+echo "[INFO] Validating tools"
+
+if [[ ! -f "./esptool/esptool.py" ]]; then
+  echo "[ERROR] esptool.py is missing"
+  exit 1
+fi
+
+if [[ ! -f "./qemu-git/build/qemu-system-xtensa" ]]; then
+  echo "[ERROR] qemu-system-xtensa is missing"
+  exit 1
+fi
+
 echo "[INFO] Validating input data"
 
 # TODO: sanitize/restrict build-folder path
@@ -68,10 +80,12 @@ if [[ "$ENV_BOOTLOADER_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
   echo "[ERROR] Invalid bootloader address (valid values=0x0000...0xffffffff)"
   exit 1
 fi
+
 if [[ "$ENV_PARTITIONS_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
   echo "[ERROR] Invalid bootloader address (valid values=0x0000...0xffffffff)"
   exit 1
 fi
+
 if [[ "$ENV_PARTITIONS_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
   echo "[ERROR] Invalid bootloader address (valid values=0x0000...0xffffffff)"
   exit 1
