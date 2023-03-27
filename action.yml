@@ -90,8 +90,7 @@ runs:
             --disable-strip --disable-user \
             --disable-capstone --disable-vnc \
             --disable-sdl --disable-gtk
-        ninja -C ${{ inputs.build-folder }}
-
+        ninja -C build
 
     - name: Setup Python 3.7
       uses: actions/setup-python@v4
