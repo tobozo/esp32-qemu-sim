@@ -168,28 +168,28 @@ runs:
         path: './esptool'
 
 
-      - name: Create firmware for QEmu
-        shell: bash
-        run: |
-          ${{ env.ESPTOOL }} --chip ${{ env.DEVICE }} merge_bin --fill-flash-size ${{ env.FLASH_SIZE }}MB -o flash_image.bin \
-            ${{ env.BOOTLOADER_ADDR }} bootloader.bin \
-            ${{ env.PARTITIONS_ADDR }} partitions.bin \
-            ${{ env.BOOT_APP0_ADDR }}  boot_app0.bin \
-            ${{ env.FIRMWARE_ADDR }}   firmware.bin \
-            ${{ env.SPIFFS_ADDR }}     spiffs.bin
+    - name: Create firmware for QEmu
+      shell: bash
+      run: |
+        ${{ env.ESPTOOL }} --chip ${{ env.DEVICE }} merge_bin --fill-flash-size ${{ env.FLASH_SIZE }}MB -o flash_image.bin \
+          ${{ env.BOOTLOADER_ADDR }} bootloader.bin \
+          ${{ env.PARTITIONS_ADDR }} partitions.bin \
+          ${{ env.BOOT_APP0_ADDR }}  boot_app0.bin \
+          ${{ env.FIRMWARE_ADDR }}   firmware.bin \
+          ${{ env.SPIFFS_ADDR }}     spiffs.bin
 
-      - name: Load firmware in QEmu
-        # qemu-system-xtensa -nographic -no-reboot -machine esp32 -drive file=firmware.bin,if=mtd,format=raw
-        shell: bash
-        run: |
-          (${{ env.QEMU_BIN }} -nographic -machine esp32 -drive file=flash_image.bin,if=mtd,format=raw | tee -a ./logs.txt) &
-          sleep ${{ env.QEMU_TIMEOUT }}
-          killall qemu-system-xtensa || true
+    - name: Load firmware in QEmu
+      # qemu-system-xtensa -nographic -no-reboot -machine esp32 -drive file=firmware.bin,if=mtd,format=raw
+      shell: bash
+      run: |
+        (${{ env.QEMU_BIN }} -nographic -machine esp32 -drive file=flash_image.bin,if=mtd,format=raw | tee -a ./logs.txt) &
+        sleep ${{ env.QEMU_TIMEOUT }}
+        killall qemu-system-xtensa || true
 
-      - name: Upload logs as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: Qemu Logs
-          path: |
-            ./logs.txt
+    - name: Upload logs as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Qemu Logs
+        path: |
+          ./logs.txt
 
