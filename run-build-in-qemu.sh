@@ -8,7 +8,7 @@
 # License: MIT
 #
 
-set -o history
+
 
 ESPTOOL_PY="./esptool/esptool.py"
 QEMU_BIN="./qemu-git/build/qemu-system-xtensa"
@@ -102,8 +102,6 @@ fi
 
 echo "[INFO] Extracting partitions info from $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV"
 
-_debug `cat $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV`
-
 OLD_IFS=$IFS
 
 csvdata=`cat $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV | tr -d ' ' | tr '\n' ';'` # remove spaces, replace \n by semicolon
@@ -145,14 +143,8 @@ echo "[INFO] Building flash image for QEmu"
 _debug "Flash Size:   $ENV_FLASH_SIZE"
 _debug "Build Folder: $ENV_BUILD_FOLDER"
 _debug "Partitions csv file: $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV"
-_debug "Image file    | Addr"$'\t'| "Path"
-_debug "--------------|-----------------------------------"
-_debug " - partition  | $ENV_PARTITIONS_ADDR"$'\t'"| $ENV_PARTITIONS_BIN"
-_debug " - otadata    | $OTADATA_ADDR"$'\t'"| $OTADATA_ADDR $ENV_OTADATA_BIN"
-_debug " - app0       | $FIRMWARE_ADDR"$'\t'"| $ENV_FIRMWARE_BIN"
-_debug " - bootloader | $ENV_BOOTLOADER_ADDR"$'\t'"| $ENV_BOOTLOADER_BIN"
-_debug " - spiffs     | $SPIFFS_ADDR"$'\t'"| $ENV_SPIFFS_BIN"
-
+_debug `cat $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV`
+_debug "$ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN $FIRMWARE_ADDR $ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN $SPIFFS_ADDR $ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN"
 
 $ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin \
   $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN \
@@ -161,15 +153,12 @@ $ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flas
   $FIRMWARE_ADDR $ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN \
   $SPIFFS_ADDR $ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN
 
-last=$(echo `history |tail -n2 |head -n1` | sed 's/[0-9]* //')
-_debug $last
 
-echo "[INFO] Running flash in QEmu"
+echo "[INFO] Running flash image in QEmu"
 _debug "QEmu timeout: $ENV_QEMU_TIMEOUT seconds"
+_debug "$QEMU_BIN -nographic -machine esp32 -drive file=flash_image.bin,if=mtd,format=raw"
 
 ($QEMU_BIN -nographic -machine esp32 -drive file=flash_image.bin,if=mtd,format=raw | tee -a ./logs.txt) &
-last=$(echo `history |tail -n2 |head -n1` | sed 's/[0-9]* //')
-_debug $last
-_debug "QEmu timeout: $ENV_QEMU_TIMEOUT seconds"
+
 sleep $ENV_QEMU_TIMEOUT
 killall qemu-system-xtensa || true
