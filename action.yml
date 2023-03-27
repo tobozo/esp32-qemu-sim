@@ -23,17 +23,31 @@ inputs:
     default: "60"
   build-folder:
     description:  "Build folder"
-    default: "./build"
-  otadata-url:
-    description: "Boot_app0 url"
-    default: https://github.com/espressif/arduino-esp32/raw/master/tools/partitions/boot_app0.bin
+    default: ./build
   bootloader-address:
     description: "Bootloader Address"
     default: "0x1000"
   partitions-address:
     description: "Partitions address"
     default: "0x8000"
-
+  partitions-csv:
+    description: "Path to partitions.csv"
+    default: partitions.csv
+  otadata-bin:
+    description: "Path to boot_app0.bin"
+    default: boot_app0.bin
+  firmware-bin:
+    description: "Path to app0.bin"
+    default: firmware.bin
+  partitions-bin:
+    description: "Path to partitions.bin"
+    default: partitions.bin
+  bootloader-bin:
+    description: "Path to bootloader.bin"
+    default: bootloader.bin
+  spiffs-bin:
+    description: "Path to spiffs.bin"
+    default: spiffs.bin
 
 
 runs:
@@ -49,22 +63,46 @@ runs:
     - name: Guess Context
       shell: bash
       run: |
+        # TODO: validate/sanitize/restrict build-folder path
         if [[ "${{ inputs.build-folder }}" == "" ]]; then
           echo "[ERROR] No build folder provided"
           exit 1
         fi
+
         if [[ ! -d "${{ inputs.build-folder }}" ]]; then
           echo "[ERROR] No build folder found, aborting"
           exit 1
         fi
-        if [[ ! -f "${{ inputs.build-folder }}/partitions.csv" ]]; then
+
+        if [[ ! -f "${{ inputs.partitions-csv }}" ]]; then
           echo "[ERROR] Missing partitions.csv file in build folder"
           exit 1
         fi
-          if [[ ! -f "${{ inputs.build-folder }}/spiffs.bin" ]]; then
-            echo "[INFO] Creating empty SPIFFS file"
-            touch "${{ inputs.build-folder }}/spiffs.bin"
-          fi
+
+        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.otadata-bin }}" ]]; then
+          # get a copy of boot_app0.bin
+          wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/partitions/boot_app0.bin -O "${{ inputs.build-folder }}/${{ inputs.otadata-bin }}"
+        fi
+
+        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.firmware-bin }} ]]; then
+          echo "[ERROR] Missing app0, check your 'firmware-bin' path"
+          exit 1
+        fi
+
+        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.partitions-bin }} ]]; then
+          echo "[ERROR] Missing partitions.bin, check your 'partitions-bin' path
+          exit 1
+        fi
+
+        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.bootloader-bin }} ]]; then
+          echo "[ERROR] Missing bootloader.bin, check your 'bootloader-bin' path
+          exit 1
+        fi
+
+        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.spiffs-bin }} ]]; then
+          echo "[INFO] Creating empty SPIFFS file"
+          touch "${{ inputs.build-folder }}/${{ inputs.spiffs-bin }}"
+        fi
 
         if [[ "${{ inputs.flash-size }}" =~ '^(2|4|8|16)$' ]]; then
           echo "[ERROR] Invalid flash size (valid values=2,4,8,16)"
@@ -96,13 +134,10 @@ runs:
         fi
 
 
-        # get a copy of boot_app0.bin
-        wget -q ${{ inputs.otadata-url }} -O ${{ inputs.build-folder }}/boot_app0.bin
-
         FLASH_SIZE=${{ inputs.flash-size }}
-        cat ${{ inputs.build-folder }}/partitions.csv
+        cat ${{ inputs.build-folder }}/${{ inputs.partitions-csv }}
         OLD_IFS=$IFS
-        csvdata=`cat ${{ inputs.build-folder }}/partitions.csv | tr -d ' ' | tr '\n' ';'` # remove spaces, replace \n by semicolon
+        csvdata=`cat ${{ inputs.build-folder }}/${{ inputs.partitions-csv }} | tr -d ' ' | tr '\n' ';'` # remove spaces, replace \n by semicolon
         IFS=';' read -ra rows <<< "$csvdata" # split lines
         for index in "${!rows[@]}"
         do
@@ -130,9 +165,6 @@ runs:
         echo "FIRMWARE_ADDR=$FIRMWARE_ADDR" >> $GITHUB_ENV
         echo "SPIFFS_ADDR=$SPIFFS_ADDR" >> $GITHUB_ENV
         echo "FLASH_SIZE=$FLASH_SIZE" >> $GITHUB_ENV
-        # copy build folder from artifact to local folder
-        cp ${{ inputs.build-folder }}/*.bin ./
-
 
     - name: Cache QEmu build
       uses: actions/cache@v3
@@ -195,16 +227,15 @@ runs:
         repository: espressif/esptool
         path: './esptool'
 
-
     - name: Create firmware for QEmu
       shell: bash
       run: |
-        ./esptool/esptool.py --chip esp32 merge_bin --fill-flash-size ${{ env.FLASH_SIZE }}MB -o flash_image.bin \
-          ${{ inputs.bootloader-address }} bootloader.bin \
-          ${{ inputs.partitions-address }} partitions.bin \
-          ${{ env.BOOT_APP0_ADDR }} boot_app0.bin \
-          ${{ env.FIRMWARE_ADDR }} firmware.bin \
-          ${{ env.SPIFFS_ADDR }} spiffs.bin
+        ./esptool/esptool.py --chip esp32 merge_bin --fill-flash-size ${{ inputs.flash-size }}MB -o flash_image.bin \
+          ${{ inputs.bootloader-address }} ${{ inputs.bootloader-bin }} \
+          ${{ inputs.partitions-address }} ${{ inputs.partitions-bin }} \
+          ${{ env.BOOT_APP0_ADDR }} ${{ inputs.boot_app0-bin }} \
+          ${{ env.FIRMWARE_ADDR }} ${{ inputs.firmware-bin }} \
+          ${{ env.SPIFFS_ADDR }} ${{ inputs.spiffs-bin }}
 
     - name: Load firmware in QEmu
       # qemu-system-xtensa -nographic -no-reboot -machine esp32 -drive file=firmware.bin,if=mtd,format=raw
