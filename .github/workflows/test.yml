@@ -32,6 +32,7 @@ jobs:
 
       - uses: tobozo/esp32-quemu-sim@main
         with:
+          debug: true
           build-folder: examples/HelloWorld/build
           partitions-csv: partitions.csv
           firmware-bin: HelloWorld.ino.bin

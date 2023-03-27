@@ -1,19 +1,15 @@
-# esp32-quemu-sim
+# ESP32 QEmu Runner
 
-Github Action to test an esp32 compiled binary in [QEmu](https://github.com/espressif/qemu).
+Use `tobozo/esp32-quemu-sim` github action to run an esp32 compiled binary in [QEmu](https://github.com/espressif/qemu) and capture the serial output.
 
 
 ```yaml
-      - uses: tobozo/esp32-quemu-sim@main
-        with:
-          flash-size: 4 #MB
-          qemu-timeout: 60 #seconds to wait before killing qemu
-          build-folder: ./build # where the binaries and partitions.csv files can be found
+  - name: 'ESP32 QEmu Runner'
+  - uses: tobozo/esp32-quemu-sim@v1
+    with:
+      flash-size: 4
+      build-folder: ./build
 ```
-
-
-
-The build folder must be available to the parent workflow prior to calling this action.
 
 
 ## Options
@@ -43,14 +39,16 @@ The logs will be available as an artifact once the action is complete.
 
 ### Project Build Folder
 
-Note: the default build folder path to the ESP project binaries is `./build`.
+/!\ The ESP32 build folder must be set and populated in the workflow prior to calling the action.
+The default path to the ESP32 project binaries is `./build`, but your mileage may vary:
+
 
 ```yaml
   with:
     build-folder: ./my-build-folder
 ```
 
-The build folder should contain the following files, they are needed to build a QEmu flash image:
+The `build-folder` can point to the ESP32 project build folder, but only those files are needed by QEmu to build a flash image:
 
 - partitions.csv
 - partitions.bin
@@ -59,7 +57,7 @@ The build folder should contain the following files, they are needed to build a 
 - firmware.bin
 - spiffs.bin (optional)
 
-The expected file names can be overriden:
+Note: the default file names can be overriden, but should always reside in the `build-folder`.
 
 ```yaml
   with:
@@ -74,7 +72,7 @@ The expected file names can be overriden:
 
 ### Bootloader Address
 
-Optionally change the addresses for bootloader.bin and partitions.bin.
+[Experimental] Optionally change the addresses for bootloader.bin and partitions.bin.
 The other addresses are extracted form the partitions.csv file.
 
 ```yaml
@@ -132,8 +130,17 @@ jobs:
 
 ```
 
+## Roadmap:
 
-Credits:
+- GDB
+- Custom strapping mode
+- eFuse (storage, secure boot)
+- Watchdogs
+
+
+
+
+## Credits:
 
 - https://github.com/espressif/qemu
 - https://github.com/listout (fixed flash sizes in QEmu)

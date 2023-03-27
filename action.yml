@@ -4,6 +4,10 @@ author: tobozo
 
 inputs:
 
+  debug:
+    description: "Add more verbosity"
+    default: "false"
+
   flash-size:
     description: "Flash Size (MB)"
     default: "4"
@@ -67,7 +71,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-qemu-
 
-    # If no cached build exists, checkout QEmu
+    # If no cached build exists, checkout qemu-xtensa
     - name: Checkout qemu-xtensa with flash size fix
       if: steps.cache-qemu.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -77,23 +81,15 @@ runs:
         path: './qemu-git'
         ref: 'fix-flash-size'
 
-    # If no cached build exists, build QEmu
+    # If no cached build exists, build qemu-xtensa
     - name: Build QEmu
       if: steps.cache-qemu.outputs.cache-hit != 'true'
       shell: bash
       run: |
         sudo apt-get update
         sudo apt-get install ninja-build cmake
-        ninja --version
-        cmake --version
-        gcc --version
         cd qemu-git
-        ./configure --target-list=xtensa-softmmu \
-            --enable-gcrypt \
-            --enable-debug --enable-sanitizers \
-            --disable-strip --disable-user \
-            --disable-capstone --disable-vnc \
-            --disable-sdl --disable-gtk
+        ./configure --target-list=xtensa-softmmu --enable-gcrypt --enable-debug --enable-sanitizers --disable-strip --disable-user --disable-capstone --disable-vnc --disable-sdl --disable-gtk
         ninja -C build
 
     # Pull python 3.7 for esptool
@@ -128,6 +124,7 @@ runs:
       env:
         # Passing parameters to the script by setting the appropriate ENV_* variables.
         # Direct passing as arguments is not possible because of blanks in the arguments.
+        ENV_DEBUG: ${{ inputs.debug }}
         ENV_FLASH_SIZE : ${{ inputs.flash-size }}
         ENV_QEMU_TIMEOUT : ${{ inputs.qemu-timeout }}
         ENV_BUILD_FOLDER : ${{ inputs.build-folder }}
