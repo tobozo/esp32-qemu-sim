@@ -18,15 +18,15 @@ inputs:
   flash-size:
     description: "Flash Size (MB)"
     default: "4"
-    required: true
   qemu-timeout:
     description: "QEmu timeout"
     default: "60"
-    required: true
   build-folder:
     description:  "Build folder"
     default: "./build"
-    required: true
+  otadata-url:
+    description: "Boot_app0 url"
+    default: https://github.com/espressif/arduino-esp32/raw/master/tools/partitions/boot_app0.bin
 
 runs:
   using: "composite"
@@ -75,7 +75,7 @@ runs:
         fi
 
         # get a copy of boot_app0.bin
-        wget -q ${{ env.BOOT_APP0_URL }}  -O ${{ inputs.build-folder }}/boot_app0.bin
+        wget -q ${{ inputs.otadata-url }} -O ${{ inputs.build-folder }}/boot_app0.bin
 
         FLASH_SIZE=${{ inputs.flash-size }}
         cat ${{ inputs.build-folder }}/partitions.csv
