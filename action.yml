@@ -1,53 +1,53 @@
-name: 'Test QEmu'
-
-
-env:
-  #QEMU_BIN: ./qemu-git/build/qemu-system-xtensa
-  #ESPTOOL: ./esptool/esptool.py
-  #BOOT_APP0_URL: https://github.com/espressif/arduino-esp32/raw/master/tools/partitions/boot_app0.bin
-  #DEFAULT_DEVICE: esp32
-  #DEFAULT_BOOTLOADER_ADDR: "0x1000"
-  #DEFAULT_PARTITIONS_ADDR: "0x8000"
-  #DEFAULT_BOOT_APP0_ADDR: "0xe000"
-  #DEFAULT_FIRMWARE_ADDR: "0x10000"
-  #DEFAULT_SPIFFS_ADDR: "0x290000"
-  #DEFAULT_FLASH_SIZE: 4
-  #QEMU_TIMEOUT: 60 # seconds
+name: 'ESP32 QEmu Runner'
+description: "Runs ESP32 compiled binaries in QEmu and collects output logs"
+author: tobozo
 
 inputs:
+
   flash-size:
     description: "Flash Size (MB)"
     default: "4"
+
   qemu-timeout:
     description: "QEmu timeout"
     default: "60"
+
   build-folder:
     description:  "Build folder"
     default: ./build
+
   bootloader-address:
     description: "Bootloader Address"
     default: "0x1000"
+
   partitions-address:
     description: "Partitions address"
     default: "0x8000"
+
   spiffs-address:
     description: "Spiffs address"
     default: "0x290000"
+
   partitions-csv:
     description: "Path to partitions.csv"
     default: partitions.csv
+
   otadata-bin:
     description: "Path to boot_app0.bin"
     default: boot_app0.bin
+
   firmware-bin:
     description: "Path to app0.bin"
     default: firmware.bin
+
   partitions-bin:
     description: "Path to partitions.bin"
     default: partitions.bin
+
   bootloader-bin:
     description: "Path to bootloader.bin"
     default: bootloader.bin
+
   spiffs-bin:
     description: "Path to spiffs.bin"
     default: spiffs.bin
@@ -57,6 +57,7 @@ runs:
   using: "composite"
   steps:
 
+    # QEmu takes ~4mn to build, check if a previous build has been cached
     - name: Cache QEmu build
       uses: actions/cache@v3
       id: cache-qemu
@@ -66,14 +67,17 @@ runs:
         restore-keys: |
           ${{ runner.os }}-qemu-
 
+    # If no cached build exists, checkout QEmu
     - name: Checkout qemu-xtensa with flash size fix
       if: steps.cache-qemu.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
       with:
+        # Note: this should be espressif/qemu but this one has a fix for flash size
         repository: listout/qemu
         path: './qemu-git'
         ref: 'fix-flash-size'
 
+    # If no cached build exists, build QEmu
     - name: Build QEmu
       if: steps.cache-qemu.outputs.cache-hit != 'true'
       shell: bash
@@ -92,11 +96,13 @@ runs:
             --disable-sdl --disable-gtk
         ninja -C build
 
+    # Pull python 3.7 for esptool
     - name: Setup Python 3.7
       uses: actions/setup-python@v4
       with:
         python-version: '3.7'
 
+    # Cache pip as we'll need pyserial to use esptool without python error
     - name: Cache pip
       uses: actions/cache@v3
       with:
@@ -105,6 +111,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
+    # Upgrade pip and install pyserial
     - name: Setup pyserial
       shell: bash
       run: |
@@ -119,6 +126,8 @@ runs:
 
     - name: Run Build in QEmu
       env:
+        # Passing parameters to the script by setting the appropriate ENV_* variables.
+        # Direct passing as arguments is not possible because of blanks in the arguments.
         ENV_FLASH_SIZE : ${{ inputs.flash-size }}
         ENV_QEMU_TIMEOUT : ${{ inputs.qemu-timeout }}
         ENV_BUILD_FOLDER : ${{ inputs.build-folder }}
@@ -134,10 +143,13 @@ runs:
       run: ${{ github.action_path }}/run-build-in-qemu.sh
       shell: bash
 
+    # Store the output logs as an artifact
     - name: Upload logs as artifact
       uses: actions/upload-artifact@v3
       with:
         name: Qemu Logs
         path: |
           ./logs.txt
+          ${{ inputs.build-folder }}/*.bin
+          ${{ inputs.build-folder }}/*.csv
 

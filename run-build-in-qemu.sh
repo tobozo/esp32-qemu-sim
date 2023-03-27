@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# TODO: validate/sanitize/restrict build-folder path
+echo "[INFO] Validating input data"
+
+# TODO: sanitize/restrict build-folder path
 if [[ "$ENV_BUILD_FOLDER" == "" ]]; then
   echo "[ERROR] No build folder provided"
   exit 1
@@ -75,6 +77,8 @@ if [[ "$ENV_PARTITIONS_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
   exit 1
 fi
 
+echo "[INFO] Extracting partitions info"
+
 cat $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV
 OLD_IFS=$IFS
 csvdata=`cat $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV | tr -d ' ' | tr '\n' ';'` # remove spaces, replace \n by semicolon
@@ -106,10 +110,6 @@ if [[ "$SPIFFS_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
   echo "[WARNING] Invalid or empty spiffs address extracted from $ENV_PARTITIONS_CSV file, overriding"
   $SPIFFS_ADDR="0x290000"
 fi
-
-#echo "OTADATA_ADDR=$OTADATA_ADDR" >> $GITHUB_ENV
-#echo "FIRMWARE_ADDR=$FIRMWARE_ADDR" >> $GITHUB_ENV
-#echo "SPIFFS_ADDR=$SPIFFS_ADDR" >> $GITHUB_ENV
 
 echo "[INFO] Building flash image for QEmu"
 
