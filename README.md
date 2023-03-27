@@ -46,24 +46,18 @@ jobs:
           extra-arduino-lib-install-args: --no-deps
           extra-arduino-cli-args: "--warnings default " # see https://github.com/ArminJo/arduino-test-compile/issues/28
           sketch-names: HelloWorld.ino
-          set-build-path: true
-      - name: Copy compiled binaries
-        run: |
-          cp -R examples/HelloWorld/build ./build
-          ls ./build/*.bin -la
-          # normalize file names
-          mv ./build/HelloWorld.ino.bin ./build/firmware.bin
-          mv ./build/HelloWorld.ino.bootloader.bin ./build/bootloader.bin
-          mv ./build/HelloWorld.ino.partitions.bin ./build/partitions.bin
-          if [[ -f "./build/HelloWorld.ino.spiffs.bin" ]]; then
-            mv ./build/HelloWorld.ino.spiffs.bin ./build/spiffs.bin
-          fi
+          set-build-path: true # build in the sketch folder
 
       - uses: tobozo/esp32-quemu-sim@main
         with:
-          flash-size: 4 #MB
-          qemu-timeout: 60 #seconds
-          build-folder: ./build # where
+          flash-size: 4 #optional, MB, default: 4
+          qemu-timeout: 60 #optional, seconds, default: 60 (1mn)
+          build-folder: examples/HelloWorld/build # path to the build folder holdingcompiled binaries and partitions.csv
+          partitions-csv: partitions.csv # relative to build-folder
+          firmware-bin: HelloWorld.ino.bin # relative to build-folder, default=firmware.bin
+          bootloader-bin: HelloWorld.ino.bootloader.bin # relative to build-folder, default=bootloader.bin
+          partitions-bin: HelloWorld.ino.partitions.bin # relative to build-folder, default=partitions.bins
+          spiffs-bin: HelloWorld.ino.spiffs.bin # optional, relative to build-folder, default=spiffs.bin
 
 
 ```
@@ -72,3 +66,4 @@ jobs:
 Credits:
 
 - https://github.com/espressif/qemu
+- https://github.com/listout (fixed flash sizes in QEmu)
