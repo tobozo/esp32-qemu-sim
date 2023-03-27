@@ -86,8 +86,6 @@ The other addresses are extracted form the partitions.csv file.
 
 
 ```yaml
-
-
 on: [push]
 
 jobs:
@@ -96,38 +94,36 @@ jobs:
     runs-on: ubuntu-latest
     name: A job to say hello
 
-    env:
-      SKETCH_REPO: tobozo/esp32-quemu-sim # put your ESP32 project repo here
-      SKETCH_NAME: HelloWorld.ino
-
     steps:
 
-      - name: Checkout
+      - name: Checkout ESP32 project
         uses: actions/checkout@v3
         with:
-          repository: ${{ env.SKETCH_REPO }} # pull the examples/HelloWorld/HelloWorld.ino from your repo
           ref: ${{ github.event.pull_request.head.sha }}
+          # repository: user/repository # or set the ESP32 project manually if different from the runner
 
-      - name: Compile sketch
+      # use Arminjo's github action to compile a sketch (could also be esp-idf or plaformio)
+      - name: Compile ESP32 project
         uses: ArminJo/arduino-test-compile@v3.2.0
         with:
           platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
           arduino-board-fqbn: esp32:esp32:esp32:FlashMode=dio,FlashFreq=80,FlashSize=4M
           arduino-platform: esp32:esp32@2.0.7
+          sketch-names: HelloWorld.ino # Will build "HelloWorld.ino"
+          set-build-path: true # build in the sketch folder
           # extra-arduino-lib-install-args: --no-deps
           # extra-arduino-cli-args: "--warnings default " # see https://github.com/ArminJo/arduino-test-compile/issues/28
-          sketch-names: ${{ env.SKETCH_NAME }}
-          set-build-path: true # build in the sketch folder
 
+      - name: Run ESP32 project in QEmu
       - uses: tobozo/esp32-quemu-sim@main
         with:
+          # Set the build folder and file names for esp32-qemu-sim
           build-folder: examples/HelloWorld/build
           partitions-csv: partitions.csv
           firmware-bin: HelloWorld.ino.bin
           bootloader-bin: HelloWorld.ino.bootloader.bin
           partitions-bin: HelloWorld.ino.partitions.bin
           spiffs-bin: HelloWorld.ino.spiffs.bin
-
 ```
 
 ## Roadmap:
@@ -139,8 +135,8 @@ jobs:
 
 
 
-
 ## Credits:
 
 - https://github.com/espressif/qemu
 - https://github.com/listout (fixed flash sizes in QEmu)
+- https://github.com/Roms1383 (peer contributor)

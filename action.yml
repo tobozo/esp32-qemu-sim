@@ -1,6 +1,9 @@
 name: 'ESP32 QEmu Runner'
 description: "Runs ESP32 compiled binaries in QEmu and collects output logs"
 author: tobozo
+branding:
+  icon: 'aperture'
+  color: 'black'
 
 inputs:
 
