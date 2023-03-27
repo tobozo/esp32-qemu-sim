@@ -2,17 +2,17 @@ name: 'Test QEmu'
 
 
 env:
-  QEMU_BIN: ./qemu-git/build/qemu-system-xtensa
-  ESPTOOL: ./esptool/esptool.py
-  BOOT_APP0_URL: https://github.com/espressif/arduino-esp32/raw/master/tools/partitions/boot_app0.bin
-  DEFAULT_DEVICE: esp32
-  DEFAULT_BOOTLOADER_ADDR: "0x1000"
-  DEFAULT_PARTITIONS_ADDR: "0x8000"
-  DEFAULT_BOOT_APP0_ADDR: "0xe000"
-  DEFAULT_FIRMWARE_ADDR: "0x10000"
-  DEFAULT_SPIFFS_ADDR: "0x290000"
-  DEFAULT_FLASH_SIZE: 4
-  QEMU_TIMEOUT: 60 # seconds
+  #QEMU_BIN: ./qemu-git/build/qemu-system-xtensa
+  #ESPTOOL: ./esptool/esptool.py
+  #BOOT_APP0_URL: https://github.com/espressif/arduino-esp32/raw/master/tools/partitions/boot_app0.bin
+  #DEFAULT_DEVICE: esp32
+  #DEFAULT_BOOTLOADER_ADDR: "0x1000"
+  #DEFAULT_PARTITIONS_ADDR: "0x8000"
+  #DEFAULT_BOOT_APP0_ADDR: "0xe000"
+  #DEFAULT_FIRMWARE_ADDR: "0x10000"
+  #DEFAULT_SPIFFS_ADDR: "0x290000"
+  #DEFAULT_FLASH_SIZE: 4
+  #QEMU_TIMEOUT: 60 # seconds
 
 inputs:
   flash-size:
@@ -61,6 +61,10 @@ runs:
           echo "[ERROR] Missing partitions.csv file in build folder"
           exit 1
         fi
+          if [[ ! -f "${{ inputs.build-folder }}/spiffs.bin" ]]; then
+            echo "[INFO] Creating empty SPIFFS file"
+            touch "${{ inputs.build-folder }}/spiffs.bin"
+          fi
 
         if [[ "${{ inputs.flash-size }}" =~ '^(2|4|8|16)$' ]]; then
           echo "[ERROR] Invalid flash size (valid values=2,4,8,16)"
@@ -122,13 +126,6 @@ runs:
           exit 1
         fi
 
-        DEVICE=${{ env.DEFAULT_DEVICE }}
-        BOOTLOADER_ADDR=${{ env.DEFAULT_BOOTLOADER_ADDR }}
-        PARTITIONS_ADDR=${{ env.DEFAULT_PARTITIONS_ADDR }}
-
-        echo "DEVICE=$DEVICE" >> $GITHUB_ENV
-        echo "BOOTLOADER_ADDR=$BOOTLOADER_ADDR" >> $GITHUB_ENV
-        echo "PARTITIONS_ADDR=$PARTITIONS_ADDR" >> $GITHUB_ENV
         echo "BOOT_APP0_ADDR=$BOOT_APP0_ADDR" >> $GITHUB_ENV
         echo "FIRMWARE_ADDR=$FIRMWARE_ADDR" >> $GITHUB_ENV
         echo "SPIFFS_ADDR=$SPIFFS_ADDR" >> $GITHUB_ENV
@@ -202,19 +199,19 @@ runs:
     - name: Create firmware for QEmu
       shell: bash
       run: |
-        ${{ env.ESPTOOL }} --chip ${{ env.DEVICE }} merge_bin --fill-flash-size ${{ env.FLASH_SIZE }}MB -o flash_image.bin \
+        ./esptool/esptool.py --chip esp32 merge_bin --fill-flash-size ${{ env.FLASH_SIZE }}MB -o flash_image.bin \
           ${{ inputs.bootloader-address }} bootloader.bin \
           ${{ inputs.partitions-address }} partitions.bin \
-          ${{ env.BOOT_APP0_ADDR }}  boot_app0.bin \
-          ${{ env.FIRMWARE_ADDR }}   firmware.bin \
-          ${{ env.SPIFFS_ADDR }}     spiffs.bin
+          ${{ env.BOOT_APP0_ADDR }} boot_app0.bin \
+          ${{ env.FIRMWARE_ADDR }} firmware.bin \
+          ${{ env.SPIFFS_ADDR }} spiffs.bin
 
     - name: Load firmware in QEmu
       # qemu-system-xtensa -nographic -no-reboot -machine esp32 -drive file=firmware.bin,if=mtd,format=raw
       shell: bash
       run: |
-        (${{ env.QEMU_BIN }} -nographic -machine esp32 -drive file=flash_image.bin,if=mtd,format=raw | tee -a ./logs.txt) &
-        sleep ${{ env.QEMU_TIMEOUT }}
+        (./qemu-git/build/qemu-system-xtensa -nographic -machine esp32 -drive file=flash_image.bin,if=mtd,format=raw | tee -a ./logs.txt) &
+        sleep ${{ inputs.qemu-timeout }}
         killall qemu-system-xtensa || true
 
     - name: Upload logs as artifact

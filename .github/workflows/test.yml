@@ -33,9 +33,6 @@ jobs:
           mv ./build/HelloWorld.ino.partitions.bin ./build/partitions.bin
           if [[ -f "./build/HelloWorld.ino.spiffs.bin" ]]; then
             mv ./build/HelloWorld.ino.spiffs.bin ./build/spiffs.bin
-          else
-            echo "[INFO] Creating empty SPIFFS file"
-            touch ./build/spiffs.bin
           fi
 
       - uses: tobozo/esp32-quemu-sim@main
