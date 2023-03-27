@@ -34,7 +34,7 @@ jobs:
             touch ./build/spiffs.bin
           fi
 
-      - uses: tobozo/esp32-quemu-sim@v1
+      - uses: tobozo/esp32-quemu-sim@main
         with:
           flash-size: 4 #MB
           qemu-timeout: 60 #seconds
