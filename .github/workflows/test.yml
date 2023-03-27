@@ -3,14 +3,20 @@ on: [push]
 
 jobs:
   hello_world_job:
+
     runs-on: ubuntu-latest
     name: A job to say hello
+
+    env:
+      SKETCH_REPO: tobozo/esp32-quemu-sim # put your ESP32 project repo here
+      SKETCH_NAME: HelloWorld.ino
+
     steps:
 
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          repository: tobozo/esp32-quemu-sim
+          repository: ${{ env.SKETCH_REPO }} # pull the examples/HelloWorld/HelloWorld.ino from your repo
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Compile sketch
@@ -19,20 +25,18 @@ jobs:
           platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
           arduino-board-fqbn: esp32:esp32:esp32:FlashMode=dio,FlashFreq=80,FlashSize=4M
           arduino-platform: esp32:esp32@2.0.7
-          extra-arduino-lib-install-args: --no-deps
-          extra-arduino-cli-args: "--warnings default " # see https://github.com/ArminJo/arduino-test-compile/issues/28
-          sketch-names: HelloWorld.ino
+          # extra-arduino-lib-install-args: --no-deps
+          # extra-arduino-cli-args: "--warnings default " # see https://github.com/ArminJo/arduino-test-compile/issues/28
+          sketch-names: ${{ env.SKETCH_NAME }}
           set-build-path: true # build in the sketch folder
 
       - uses: tobozo/esp32-quemu-sim@main
         with:
-          flash-size: 4 #optional, MB, default: 4
-          qemu-timeout: 60 #optional, seconds, default: 60 (1mn)
-          build-folder: examples/HelloWorld/build # path to the build folder holdingcompiled binaries and partitions.csv
-          partitions-csv: partitions.csv # relative to build-folder
-          firmware-bin: HelloWorld.ino.bin # relative to build-folder, default=firmware.bin
-          bootloader-bin: HelloWorld.ino.bootloader.bin # relative to build-folder, default=bootloader.bin
-          partitions-bin: HelloWorld.ino.partitions.bin # relative to build-folder, default=partitions.bins
-          spiffs-bin: HelloWorld.ino.spiffs.bin # optional, relative to build-folder, default=spiffs.bin
+          build-folder: examples/HelloWorld/build
+          partitions-csv: partitions.csv
+          firmware-bin: HelloWorld.ino.bin
+          bootloader-bin: HelloWorld.ino.bootloader.bin
+          partitions-bin: HelloWorld.ino.partitions.bin
+          spiffs-bin: HelloWorld.ino.spiffs.bin
 
 
