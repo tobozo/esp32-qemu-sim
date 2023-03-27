@@ -41,23 +41,36 @@ runs:
     - name: Guess Context
       shell: bash
       run: |
+        if [[ "${{ inputs.build-folder }}" == "" ]]; then
+          echo "[ERROR] No build folder provided"
+          exit 1
+        fi
         if [[ ! -d "${{ inputs.build-folder }}" ]]; then
           echo "[ERROR] No build folder found, aborting"
           exit 1
         fi
-
-        if [[ ! -d "${{ inputs.flash-size }}" ]]; then
-          echo "[ERROR] missing flash size property"
-          exit 1
-        fi
-
-        if [[ ! -d "${{ inputs.qemu-timeout }}" ]]; then
-          echo "[ERROR] missing timeout property"
-          exit 1
-        fi
-
         if [[ ! -f "${{ inputs.build-folder }}/partitions.csv" ]]; then
-          echo "[ERROR] missing partitions.csv file in build folder"
+          echo "[ERROR] Missing partitions.csv file in build folder"
+          exit 1
+        fi
+
+        if [[ "${{ inputs.flash-size }}" =~ '^(2|4|8|16)$' ]]; then
+          echo "[ERROR] Invalid flash size (valid values=2,4,8,16)"
+          exit 1
+        fi
+
+        if [[ "${{ inputs.qemu-timeout }}" =~ '^[0-9]{1,3}$' ]]; then
+          echo "[ERROR] Invalid timeout value (valid values=0...999)"
+          exit 1
+        fi
+
+        if [[ "${{ inputs.flash-size }}" == "" ]]; then
+          echo "[ERROR] Missing flash size property"
+          exit 1
+        fi
+
+        if [[ "${{ inputs.qemu-timeout }}" == "" ]]; then
+          echo "[ERROR] Missing timeout property"
           exit 1
         fi
 
