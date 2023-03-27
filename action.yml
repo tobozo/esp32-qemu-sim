@@ -84,23 +84,23 @@ runs:
           wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/partitions/boot_app0.bin -O "${{ inputs.build-folder }}/${{ inputs.otadata-bin }}"
         fi
 
-        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.firmware-bin }} ]]; then
+        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.firmware-bin }}" ]]; then
           echo "[ERROR] Missing app0, check your 'firmware-bin' path"
           exit 1
         fi
 
-        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.partitions-bin }} ]]; then
+        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.partitions-bin }}" ]]; then
           # TODO: generate partitions.bin from partitions.csv using gen_esp32part.py
           echo "[ERROR] Missing partitions.bin, check your 'partitions-bin' path
           exit 1
         fi
 
-        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.bootloader-bin }} ]]; then
+        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.bootloader-bin }}" ]]; then
           echo "[ERROR] Missing bootloader.bin, check your 'bootloader-bin' path
           exit 1
         fi
 
-        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.spiffs-bin }} ]]; then
+        if [[ ! -f "${{ inputs.build-folder }}/${{ inputs.spiffs-bin }}" ]]; then
           echo "[INFO] Creating empty SPIFFS file"
           touch "${{ inputs.build-folder }}/${{ inputs.spiffs-bin }}"
         fi
