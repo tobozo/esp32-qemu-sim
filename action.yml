@@ -39,6 +39,7 @@ runs:
         path: ${{ inputs.build-folder }}
 
     - name: Guess Context
+      shell: bash
       run: |
         if [[ ! -d "${{ inputs.build-folder }}" ]]; then
           echo "[ERROR] No build folder found, aborting"
@@ -124,6 +125,7 @@ runs:
 
     - name: Build QEmu
       if: steps.cache-qemu.outputs.cache-hit != 'true'
+      shell: bash
       run: |
         sudo apt-get update
         sudo apt-get install ninja-build cmake
@@ -154,6 +156,7 @@ runs:
           ${{ runner.os }}-pip-
 
     - name: Setup pyserial
+      shell: bash
       run: |
         python -m pip install --upgrade pip
         pip install --upgrade pyserial
@@ -166,6 +169,7 @@ runs:
 
 
       - name: Create firmware for QEmu
+        shell: bash
         run: |
           ${{ env.ESPTOOL }} --chip ${{ env.DEVICE }} merge_bin --fill-flash-size ${{ env.FLASH_SIZE }}MB -o flash_image.bin \
             ${{ env.BOOTLOADER_ADDR }} bootloader.bin \
@@ -176,6 +180,7 @@ runs:
 
       - name: Load firmware in QEmu
         # qemu-system-xtensa -nographic -no-reboot -machine esp32 -drive file=firmware.bin,if=mtd,format=raw
+        shell: bash
         run: |
           (${{ env.QEMU_BIN }} -nographic -machine esp32 -drive file=flash_image.bin,if=mtd,format=raw | tee -a ./logs.txt) &
           sleep ${{ env.QEMU_TIMEOUT }}
