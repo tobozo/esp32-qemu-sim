@@ -27,6 +27,14 @@ inputs:
   otadata-url:
     description: "Boot_app0 url"
     default: https://github.com/espressif/arduino-esp32/raw/master/tools/partitions/boot_app0.bin
+  bootloader-address:
+    description: "Bootloader Address"
+    default: "0x1000"
+  partitions-address:
+    description: "Partitions address"
+    default: "0x8000"
+
+
 
 runs:
   using: "composite"
@@ -73,6 +81,16 @@ runs:
           echo "[ERROR] Missing timeout property"
           exit 1
         fi
+
+        if [[ "${{ inputs.bootloader-address }}" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
+          echo "[ERROR] Invalid bootloader address (valid values=0x0000...0xffffffff)"
+          exit 1
+        fi
+        if [[ "${{ inputs.partitions-address }}" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
+          echo "[ERROR] Invalid bootloader address (valid values=0x0000...0xffffffff)"
+          exit 1
+        fi
+
 
         # get a copy of boot_app0.bin
         wget -q ${{ inputs.otadata-url }} -O ${{ inputs.build-folder }}/boot_app0.bin
@@ -185,8 +203,8 @@ runs:
       shell: bash
       run: |
         ${{ env.ESPTOOL }} --chip ${{ env.DEVICE }} merge_bin --fill-flash-size ${{ env.FLASH_SIZE }}MB -o flash_image.bin \
-          ${{ env.BOOTLOADER_ADDR }} bootloader.bin \
-          ${{ env.PARTITIONS_ADDR }} partitions.bin \
+          ${{ inputs.bootloader-address }} bootloader.bin \
+          ${{ inputs.partitions-address }} partitions.bin \
           ${{ env.BOOT_APP0_ADDR }}  boot_app0.bin \
           ${{ env.FIRMWARE_ADDR }}   firmware.bin \
           ${{ env.SPIFFS_ADDR }}     spiffs.bin
