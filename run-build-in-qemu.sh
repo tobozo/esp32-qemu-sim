@@ -15,38 +15,37 @@ QEMU_BIN="./qemu-git/build/qemu-system-xtensa"
 
 
 if [[ "$ENV_DEBUG" != "false" ]]; then
-  function _debug { echo $1; }
+  function _debug { echo "[ERROR] $1"; }
 else
   function _debug { return; }
 fi
 
+
+function exit_with_error { echo $1; exit 1; }
+
+
 echo "[INFO] Validating tools"
 
 if [[ ! -f "$ESPTOOL_PY" ]]; then
-  echo "[ERROR] esptool.py is missing"
-  exit 1
+  exit_with_error "esptool.py is missing"
 fi
 
 if [[ ! -f "$QEMU_BIN" ]]; then
-  echo "[ERROR] qemu-system-xtensa is missing"
-  exit 1
+  exit_with_error "qemu-system-xtensa is missing"
 fi
 
 echo "[INFO] Validating input data"
 
 if [[ "$ENV_BUILD_FOLDER" == "" ]]; then
-  echo "[ERROR] No build folder provided"
-  exit 1
+  exit_with_error "No build folder provided"
 fi
 
 if [[ ! -d "$ENV_BUILD_FOLDER" ]]; then
-  echo "[ERROR] No build folder found, aborting"
-  exit 1
+  exit_with_error "No build folder found, aborting"
 fi
 
 if [[ ! -f "$ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV" ]]; then
-  echo "[ERROR] Missing partitions.csv file in build folder"
-  exit 1
+  exit_with_error "Missing partitions.csv file in build folder"
 fi
 
 if [[ ! -f "$ENV_BUILD_FOLDER/$ENV_OTADATA_BIN" ]]; then
@@ -55,19 +54,16 @@ if [[ ! -f "$ENV_BUILD_FOLDER/$ENV_OTADATA_BIN" ]]; then
 fi
 
 if [[ ! -f "$ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN" ]]; then
-  echo "[ERROR] Missing app0, check your 'firmware-bin' path"
-  exit 1
+  exit_with_error "Missing app0, check your 'firmware-bin' path"
 fi
 
 if [[ ! -f "$ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN" ]]; then
   # TODO: generate partitions.bin from partitions.csv using gen_esp32part.py
-  echo "[ERROR] Missing partitions.bin, check your 'partitions-bin' path"
-  exit 1
+  exit_with_error "Missing partitions.bin, check your 'partitions-bin' path"
 fi
 
 if [[ ! -f "$ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN" ]]; then
-  echo "[ERROR] Missing bootloader.bin, check your 'bootloader-bin' path"
-  exit 1
+  exit_with_error "Missing bootloader.bin, check your 'bootloader-bin' path"
 fi
 
 if [[ ! -f "$ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN" ]]; then
@@ -76,28 +72,23 @@ if [[ ! -f "$ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN" ]]; then
 fi
 
 if [[ "$ENV_FLASH_SIZE" =~ '^(2|4|8|16)$' ]]; then
-  echo "[ERROR] Invalid flash size (valid values=2,4,8,16)"
-  exit 1
+  exit_with_error "Invalid flash size (valid values=2,4,8,16)"
 fi
 
 if [[ "$ENV_QEMU_TIMEOUT" =~ '^[0-9]{1,3}$' ]]; then
-  echo "[ERROR] Invalid timeout value (valid values=0...999)"
-  exit 1
+  exit_with_error "Invalid timeout value (valid values=0...999)"
 fi
 
 if [[ "$ENV_BOOTLOADER_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
-  echo "[ERROR] Invalid bootloader address (valid values=0x0000...0xffffffff)"
-  exit 1
+  exit_with_error "Invalid bootloader address (valid values=0x0000...0xffffffff)"
 fi
 
 if [[ "$ENV_PARTITIONS_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
-  echo "[ERROR] Invalid bootloader address (valid values=0x0000...0xffffffff)"
-  exit 1
+  exit_with_error "Invalid bootloader address (valid values=0x0000...0xffffffff)"
 fi
 
 if [[ "$ENV_PARTITIONS_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
-  echo "[ERROR] Invalid bootloader address (valid values=0x0000...0xffffffff)"
-  exit 1
+  exit_with_error "Invalid bootloader address (valid values=0x0000...0xffffffff)"
 fi
 
 echo "[INFO] Extracting partitions info from $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV"
@@ -124,13 +115,11 @@ _debug `( set -o posix ; set ) | grep _ADDR`
 IFS=$OLD_IFS
 
 if [[ "$OTADATA_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
-  echo "[ERROR] Invalid otadata address in $ENV_PARTITIONS_CSV file"
-  exit 1
+  exit_with_error "Invalid otadata address in $ENV_PARTITIONS_CSV file"
 fi
 
 if [[ "$FIRMWARE_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
-  echo "[ERROR] Invalid app0 address in $ENV_PARTITIONS_CSV file"
-  exit 1
+  exit_with_error "Invalid app0 address in $ENV_PARTITIONS_CSV file"
 fi
 
 if [[ "$SPIFFS_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
