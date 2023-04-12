@@ -15,7 +15,7 @@ QEMU_BIN="./qemu-git/build/qemu-system-xtensa"
 
 
 if [[ "$ENV_DEBUG" != "false" ]]; then
-  function _debug { echo "[ERROR] $1"; }
+  function _debug { echo "[DEBUG] $1"; }
 else
   function _debug { return; }
 fi
