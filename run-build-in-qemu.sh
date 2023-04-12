@@ -20,7 +20,7 @@ else
   function _debug { return; }
 fi
 
-function exit_with_error { echo $1; exit 1; }
+function exit_with_error { echo "$1"; exit 1; }
 
 echo "[INFO] Validating tools"
 
@@ -73,7 +73,7 @@ do
   esac
 done
 
-_debug `( set -o posix ; set ) | grep _ADDR`
+_debug "`( set -o posix ; set ) | grep _ADDR`"
 
 IFS=$OLD_IFS
 
@@ -91,7 +91,7 @@ echo "[INFO] Building flash image for QEmu"
 _debug "Flash Size:   $ENV_FLASH_SIZE"
 _debug "Build Folder: $ENV_BUILD_FOLDER"
 _debug "Partitions csv file: $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV"
-_debug `cat $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV`
+_debug "`cat $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV`"
 _debug "$ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN $FIRMWARE_ADDR $ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN $SPIFFS_ADDR $ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN"
 
 $ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin \
