@@ -12,6 +12,11 @@ Use `tobozo/esp32-qemu-sim` github action to run an esp32 compiled binary in [QE
 ```
 
 
+## Requirements
+
+- FlashMode must be DIO/80MHz, qemu doesn't like QIO
+
+
 ## Options
 
 

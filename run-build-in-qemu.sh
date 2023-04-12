@@ -66,9 +66,9 @@ for index in "${!rows[@]}"
 do
   IFS=',' read -ra csv_columns <<< "${rows[$index]}" # split columns
   case "${csv_columns[0]}" in
-    otadata)  OTADATA_ADDR="${csv_columns[3]}"  _debug "OTADATA_ADDR=$OTADATA_ADDR";;
-    app0)     FIRMWARE_ADDR="${csv_columns[3]}" _debug "FIRMWARE_ADDR=$FIRMWARE_ADDR";;
-    spiffs)   SPIFFS_ADDR="${csv_columns[3]}"   _debug "SPIFFS_ADDR=$SPIFFS_ADDR";;
+    otadata)  OTADATA_ADDR="${csv_columns[3]}"  ;;
+    app0)     FIRMWARE_ADDR="${csv_columns[3]}" ;;
+    spiffs)   SPIFFS_ADDR="${csv_columns[3]}"   ;;
     *) _debug "Ignoring ${csv_columns[0]}:${csv_columns[3]}" ;;
   esac
 done
@@ -77,13 +77,9 @@ _debug `( set -o posix ; set ) | grep _ADDR`
 
 IFS=$OLD_IFS
 
-if [[ "$OTADATA_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
-  exit_with_error "Invalid otadata address in $ENV_PARTITIONS_CSV file"
-fi
+[[ "$OTADATA_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]] && exit_with_error "Invalid otadata address in $ENV_PARTITIONS_CSV file"
+[[ "$FIRMWARE_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]] && exit_with_error "Invalid app0 address in $ENV_PARTITIONS_CSV file"
 
-if [[ "$FIRMWARE_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
-  exit_with_error "Invalid app0 address in $ENV_PARTITIONS_CSV file"
-fi
 
 if [[ "$SPIFFS_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
   echo "[WARNING] Invalid or empty spiffs address extracted from $ENV_PARTITIONS_CSV file, overriding"
