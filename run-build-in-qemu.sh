@@ -101,7 +101,7 @@ _debug "Partitions csv file: $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV"
 _debug "`cat $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV`"
 _debug "$ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN $FIRMWARE_ADDR $ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN $SPIFFS_ADDR $ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN"
 
-$ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB $ENV_PSRAM -o flash_image.bin \
+$ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin \
   $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN \
   $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN \
   $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN \
@@ -111,9 +111,9 @@ $ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB $ENV_PS
 
 echo "[INFO] Running flash image in QEmu"
 _debug "QEmu timeout: $ENV_QEMU_TIMEOUT seconds"
-_debug "$QEMU_BIN -nographic -machine esp32 -drive file=flash_image.bin,if=mtd,format=raw"
+_debug "$QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw"
 
-($QEMU_BIN -nographic -machine esp32 -drive file=flash_image.bin,if=mtd,format=raw | tee -a ./logs.txt) &
+($QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw | tee -a ./logs.txt) &
 
 sleep $ENV_QEMU_TIMEOUT
 killall qemu-system-xtensa || true
