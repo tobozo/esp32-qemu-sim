@@ -29,7 +29,7 @@ jobs:
           set-build-path: true # build in the sketch folder
 
       - name: Run ESP32 project in QEmu
-        uses: tobozo/esp32-qemu-sim@4c0d73861aa42c0a7ca9f589793272ae3fb88b5f
+        uses: tobozo/esp32-qemu-sim@main
         with:
           debug: true
           build-folder: test/build
