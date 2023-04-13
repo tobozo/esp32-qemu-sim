@@ -79,11 +79,11 @@ _debug "`( set -o posix ; set ) | grep _ADDR`"
 
 IFS=$OLD_IFS
 
-[[ "$OTADATA_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]] || exit_with_error "Invalid otadata address in $ENV_PARTITIONS_CSV file"
-[[ "$FIRMWARE_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]] || exit_with_error "Invalid app0 address in $ENV_PARTITIONS_CSV file"
+[[ "$OTADATA_ADDR" =~ ^0x[0-9a-zA-Z]{1,8}$ ]] || exit_with_error "Invalid otadata address in $ENV_PARTITIONS_CSV file"
+[[ "$FIRMWARE_ADDR" =~ ^0x[0-9a-zA-Z]{1,8}$ ]] || exit_with_error "Invalid app0 address in $ENV_PARTITIONS_CSV file"
 
 
-if [[ "$SPIFFS_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]]; then
+if [[ "$SPIFFS_ADDR" =~ ^0x[0-9a-zA-Z]{1,8}$ ]]; then
   echo "[WARNING] Invalid or empty spiffs address extracted from $ENV_PARTITIONS_CSV file, overriding"
   $SPIFFS_ADDR="0x290000"
 fi
