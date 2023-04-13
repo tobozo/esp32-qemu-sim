@@ -113,7 +113,7 @@ echo "[INFO] Running flash image in QEmu"
 _debug "QEmu timeout: $ENV_QEMU_TIMEOUT seconds"
 _debug "$QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw"
 
-($QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw | tee -a ./logs.txt) &
+($QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true | tee -a ./logs.txt) &
 
 sleep $ENV_QEMU_TIMEOUT
 killall qemu-system-xtensa || true
