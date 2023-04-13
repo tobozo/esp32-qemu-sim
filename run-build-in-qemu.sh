@@ -52,8 +52,8 @@ fi
 #[[ "$ENV_PSRAM" =~ ^(2M|4M)$ ]] && exit_with_error "Invalid flash size (valid values=2,4,8,16)"
 [[ "$ENV_PSRAM" =~ ^(2M|4M)$ ]] && ENV_PSRAM="-m $ENV_PSRAM" || ENV_PSRAM=""
 [[ "$ENV_QEMU_TIMEOUT" =~ ^[0-9]{1,3}$ ]] || exit_with_error "Invalid timeout value (valid values=0...999)"
-[[ "$ENV_BOOTLOADER_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]] || exit_with_error "Invalid bootloader address (valid values=0x0000...0xffffffff)"
-[[ "$ENV_PARTITIONS_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]] || exit_with_error "Invalid partitions address (valid values=0x0000...0xffffffff)"
+[[ "$ENV_BOOTLOADER_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]] || exit_with_error "Invalid bootloader address '$ENV_BOOTLOADER_ADDR' (valid values=0x0000...0xffffffff)"
+[[ "$ENV_PARTITIONS_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]] || exit_with_error "Invalid partitions address '$ENV_PARTITIONS_ADDR' (valid values=0x0000...0xffffffff)"
 #[[ "$ENV_PARTITIONS_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]] || exit_with_error "Invalid bootloader address (valid values=0x0000...0xffffffff)"
 
 echo "[INFO] Extracting partitions info from $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV"
