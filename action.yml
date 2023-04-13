@@ -15,6 +15,10 @@ inputs:
     description: "Flash Size (MB)"
     default: "4"
 
+  psram:
+    description: "PSRam"
+    default: "disabled"
+
   qemu-timeout:
     description: "QEmu timeout"
     default: "60"
@@ -129,17 +133,19 @@ runs:
         # Direct passing as arguments is not possible because of blanks in the arguments.
         ENV_DEBUG: ${{ inputs.debug }}
         ENV_FLASH_SIZE : ${{ inputs.flash-size }}
+        ENV_PSRAM: ${{ inputs.psram }}
         ENV_QEMU_TIMEOUT : ${{ inputs.qemu-timeout }}
         ENV_BUILD_FOLDER : ${{ inputs.build-folder }}
         ENV_BOOTLOADER_ADDR : ${{ inputs.bootloader-address }}
+        ENV_BOOTLOADER_BIN : ${{ inputs.bootloader-bin }}
         ENV_PARTITIONS_ADDR : ${{ inputs.partitions-address }}
-        ENV_SPIFFS_ADDR : ${{ inputs.spiffs-address }}
         ENV_PARTITIONS_CSV : ${{ inputs.partitions-csv }}
+        ENV_SPIFFS_ADDR : ${{ inputs.spiffs-address }}
+        ENV_SPIFFS_BIN : ${{ inputs.spiffs-bin }}
         ENV_OTADATA_BIN : ${{ inputs.otadata-bin }}
         ENV_FIRMWARE_BIN : ${{ inputs.firmware-bin }}
         ENV_PARTITIONS_BIN : ${{ inputs.partitions-bin }}
-        ENV_BOOTLOADER_BIN : ${{ inputs.bootloader-bin }}
-        ENV_SPIFFS_BIN : ${{ inputs.spiffs-bin }}
+
       run: ${{ github.action_path }}/run-build-in-qemu.sh
       shell: bash
 

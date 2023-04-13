@@ -20,13 +20,19 @@ Use `tobozo/esp32-qemu-sim` github action to run an esp32 compiled binary in [QE
 ## Options
 
 
-### Flash Size
+### Flash Options
 
-Specify a different flash size, valid values are 2, 4, 8, 16
+Specify a different flash size and/or psram size.
+
+Valid flash size values are `2`, `4`, `8`, `16`.
+
+Valid psram size values are `(none)`, `2M`, `4M`.
+
 
 ```yaml
   with:
     flash-size: 4
+    psram: 2M
 ```
 
 ### QEmu timeout
