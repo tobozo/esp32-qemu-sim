@@ -48,11 +48,13 @@ if [[ ! -f "$ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN" ]]; then
   touch "$ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN"
 fi
 
-[[ "$ENV_FLASH_SIZE" =~ '^(2|4|8|16)$' ]] && exit_with_error "Invalid flash size (valid values=2,4,8,16)"
-[[ "$ENV_QEMU_TIMEOUT" =~ '^[0-9]{1,3}$' ]] && exit_with_error "Invalid timeout value (valid values=0...999)"
-[[ "$ENV_BOOTLOADER_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]] && exit_with_error "Invalid bootloader address (valid values=0x0000...0xffffffff)"
-[[ "$ENV_PARTITIONS_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]] && exit_with_error "Invalid bootloader address (valid values=0x0000...0xffffffff)"
-[[ "$ENV_PARTITIONS_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]] && exit_with_error "Invalid bootloader address (valid values=0x0000...0xffffffff)"
+[[ "$ENV_FLASH_SIZE" =~ ^(2|4|8|16)$ ]] || exit_with_error "Invalid flash size (valid values=2,4,8,16)"
+#[[ "$ENV_PSRAM" =~ ^(2M|4M)$ ]] && exit_with_error "Invalid flash size (valid values=2,4,8,16)"
+[[ "$ENV_PSRAM" =~ ^(2M|4M)$ ]] && ENV_PSRAM="-m $ENV_PSRAM" || ENV_PSRAM=""
+[[ "$ENV_QEMU_TIMEOUT" =~ ^[0-9]{1,3}$ ]] || exit_with_error "Invalid timeout value (valid values=0...999)"
+[[ "$ENV_BOOTLOADER_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]] || exit_with_error "Invalid bootloader address (valid values=0x0000...0xffffffff)"
+[[ "$ENV_PARTITIONS_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]] || exit_with_error "Invalid partitions address (valid values=0x0000...0xffffffff)"
+#[[ "$ENV_PARTITIONS_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]] || exit_with_error "Invalid bootloader address (valid values=0x0000...0xffffffff)"
 
 echo "[INFO] Extracting partitions info from $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV"
 
@@ -77,14 +79,19 @@ _debug "`( set -o posix ; set ) | grep _ADDR`"
 
 IFS=$OLD_IFS
 
-[[ "$OTADATA_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]] && exit_with_error "Invalid otadata address in $ENV_PARTITIONS_CSV file"
-[[ "$FIRMWARE_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]] && exit_with_error "Invalid app0 address in $ENV_PARTITIONS_CSV file"
+[[ "$OTADATA_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]] || exit_with_error "Invalid otadata address in $ENV_PARTITIONS_CSV file"
+[[ "$FIRMWARE_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]] || exit_with_error "Invalid app0 address in $ENV_PARTITIONS_CSV file"
 
 
-if [[ "$SPIFFS_ADDR" =~ '^0x[0-9a-z-A-Z]{1,8}$' ]]; then
+if [[ "$SPIFFS_ADDR" =~ ^0x[0-9a-z-A-Z]{1,8}$ ]]; then
   echo "[WARNING] Invalid or empty spiffs address extracted from $ENV_PARTITIONS_CSV file, overriding"
   $SPIFFS_ADDR="0x290000"
 fi
+
+if [[ "$SPIFFS_ADDR" != "$ENV_SPIFFS_ADDR" ]]; then
+  echo "[WARNING] SPIFFS address mismatch (csv=$SPIFFS_ADDR, workflow=$ENV_SPIFFS_ADDR)"
+fi
+
 
 echo "[INFO] Building flash image for QEmu"
 
@@ -94,7 +101,7 @@ _debug "Partitions csv file: $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV"
 _debug "`cat $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV`"
 _debug "$ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN $FIRMWARE_ADDR $ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN $SPIFFS_ADDR $ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN"
 
-$ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin \
+$ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB $ENV_PSRAM -o flash_image.bin \
   $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN \
   $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN \
   $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN \
