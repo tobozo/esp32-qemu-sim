@@ -84,7 +84,8 @@ runs:
       uses: actions/checkout@v3
       with:
         # Note: this should be espressif/qemu but this one has a fix for flash size
-        repository: listout/qemu
+        #repository: listout/qemu
+        repository: espressif/qemu
         path: './qemu-git'
         ref: 'fix-flash-size'
 
