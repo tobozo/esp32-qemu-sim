@@ -85,9 +85,11 @@ runs:
       with:
         # Note: this should be espressif/qemu but this one has a fix for flash size
         #repository: listout/qemu
+        #ref: 'fix-flash-size'
         repository: espressif/qemu
+        ref: 'esp-develop'
         path: './qemu-git'
-        ref: 'fix-flash-size'
+
 
     # If no cached build exists, build qemu-xtensa
     - name: Build QEmu
