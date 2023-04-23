@@ -85,7 +85,7 @@ IFS=$OLD_IFS
 
 if [[ "$SPIFFS_ADDR" =~ ^0x[0-9a-zA-Z]{1,8}$ ]]; then
   echo "[WARNING] Invalid or empty spiffs address extracted from $ENV_PARTITIONS_CSV file, overriding"
-  $SPIFFS_ADDR="0x290000"
+  SPIFFS_ADDR="0x290000"
 fi
 
 if [[ "$SPIFFS_ADDR" != "$ENV_SPIFFS_ADDR" ]]; then
