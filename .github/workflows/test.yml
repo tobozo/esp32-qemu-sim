@@ -1,5 +1,5 @@
 
-on: [push]
+on: [push,workflow_dispatch]
 
 jobs:
   hello_world_job:
