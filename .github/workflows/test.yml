@@ -33,7 +33,7 @@ jobs:
         uses: tobozo/esp32-qemu-sim@main
         with:
           debug: true
-          #psram: 2M
+          psram: 2M
           build-folder: test/build
           partitions-csv: partitions.csv
           firmware-bin: test.ino.bin
