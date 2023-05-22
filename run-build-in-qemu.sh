@@ -111,7 +111,7 @@ $ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flas
 
 echo "[INFO] Running flash image in QEmu"
 _debug "QEmu timeout: $ENV_QEMU_TIMEOUT seconds"
-_debug "$QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw"
+_debug "$QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true"
 
 ($QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true | tee -a ./logs.txt) &
 
