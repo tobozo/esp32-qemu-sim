@@ -97,7 +97,7 @@ runs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get install ninja-build cmake libglib2.0-dev libcrypt-dev
+        sudo apt-get install ninja-build cmake libglib2.0-dev libcrypt-dev libgcrypt20-dev
         cd qemu-git
         ./configure --target-list=xtensa-softmmu --enable-gcrypt --enable-debug --enable-sanitizers --disable-strip --disable-user --disable-capstone --disable-vnc --disable-sdl --disable-gtk
         ninja -C build
