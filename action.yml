@@ -122,7 +122,7 @@ runs:
       shell: bash
       run: |
         python -m pip install --upgrade pip
-        pip install --upgrade pyserial pytest-embedded intelhex rich
+        pip install --upgrade pyserial pytest-embedded intelhex rich-click
 
     - name: Checkout esptool.py
       uses: actions/checkout@v3
