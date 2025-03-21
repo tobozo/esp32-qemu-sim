@@ -102,11 +102,11 @@ runs:
         ./configure --target-list=xtensa-softmmu --enable-gcrypt --enable-debug --disable-strip --disable-user --disable-capstone --disable-vnc --disable-sdl --disable-gtk
         ninja -C build
 
-    # Pull python 3.7 for esptool
-    - name: Setup Python 3.8.13
-      uses: actions/setup-python@v5.3.0
+    # Pull python 3.11 for esptool
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v5.4.0
       with:
-        python-version: '3.8.13'
+        python-version: '3.11'
 
     # Cache pip as we'll need pyserial to use esptool without python error
     - name: Cache pip
