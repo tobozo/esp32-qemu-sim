@@ -47,6 +47,16 @@ The logs will be available as an artifact once the action is complete.
     qemu-timeout: "60"
 ```
 
+A timeout can be interrupted when Qemu output matches a given string or regex.
+
+```yaml
+  with:
+    qemu-timeout: "1200" # 20 minutes
+    timeout-interrupt-regex: "Test Complete"
+    # timeout-interrupt-regex: "/^Test Complete$/"
+    # timeout-interrupt-regex: "/(Test Complete)|(guru meditation)/"
+```
+
 
 ### Project Build Folder
 
