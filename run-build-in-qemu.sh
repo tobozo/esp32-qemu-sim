@@ -10,7 +10,7 @@
 
 
 
-ESPTOOL_PY="./esptool/esptool.py"
+ESPTOOL="./esptool/esptool"
 QEMU_BIN="./qemu-git/build/qemu-system-xtensa"
 
 
@@ -24,7 +24,7 @@ function exit_with_error { echo "$1"; exit 1; }
 
 echo "[INFO] Validating tools"
 
-[[ ! -f "$ESPTOOL_PY" ]] && exit_with_error "esptool.py is missing"
+[[ ! -f "$ESPTOOL" ]] && exit_with_error "esptool.py is missing"
 [[ ! -f "$QEMU_BIN" ]] && exit_with_error "qemu-system-xtensa is missing"
 
 echo "[INFO] Validating input data"
@@ -99,9 +99,9 @@ _debug "Flash Size:   $ENV_FLASH_SIZE"
 _debug "Build Folder: $ENV_BUILD_FOLDER"
 _debug "Partitions csv file: $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV"
 _debug "`cat $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV`"
-_debug "$ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN $FIRMWARE_ADDR $ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN $SPIFFS_ADDR $ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN"
+_debug "$ESPTOOL --chip esp32 merge-bin --pad-to-size ${ENV_FLASH_SIZE}MB -o flash_image.bin $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN $FIRMWARE_ADDR $ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN $SPIFFS_ADDR $ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN"
 
-$ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin \
+$ESPTOOL --chip esp32 merge-bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin \
   $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN \
   $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN \
   $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN \
