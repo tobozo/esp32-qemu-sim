@@ -40,5 +40,6 @@ jobs:
           bootloader-bin: test.ino.bootloader.bin
           partitions-bin: test.ino.partitions.bin
           spiffs-bin: test.ino.spiffs.bin
+          timeout-interrupt-regex: "Test Complete"
 
 
