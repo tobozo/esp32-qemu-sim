@@ -25,7 +25,7 @@ inputs:
 
   timeout-interrupt-regex:
     description: "Interrupt string"
-    default: "Stop Qemu when this string is printed to serial"
+    default: ""
 
   build-folder:
     description:  "Build folder"
