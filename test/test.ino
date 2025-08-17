@@ -24,4 +24,12 @@ void loop()
 {
   Serial.println("Hello World!");
   delay(1000);
+
+  static int count = 0;
+  count++;
+
+  if( count == 10 ) {
+    Serial.println("Test Complete, now halting!");
+    while(1) delay(1);
+  }
 }

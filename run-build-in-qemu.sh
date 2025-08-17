@@ -10,12 +10,12 @@
 
 
 
-ESPTOOL_PY="./esptool/esptool.py"
+ESPTOOL="./esptool/esptool.py"
 QEMU_BIN="./qemu-git/build/qemu-system-xtensa"
 
 
 if [[ "$ENV_DEBUG" != "false" ]]; then
-  function _debug { echo "[DEBUG] $1"; }
+  function _debug { echo "[$(date +%H:%M:%S)][DEBUG] $1"; }
 else
   function _debug { return; }
 fi
@@ -24,7 +24,7 @@ function exit_with_error { echo "$1"; exit 1; }
 
 echo "[INFO] Validating tools"
 
-[[ ! -f "$ESPTOOL_PY" ]] && exit_with_error "esptool.py is missing"
+[[ ! -f "$ESPTOOL" ]] && exit_with_error "esptool.py is missing"
 [[ ! -f "$QEMU_BIN" ]] && exit_with_error "qemu-system-xtensa is missing"
 
 echo "[INFO] Validating input data"
@@ -99,9 +99,9 @@ _debug "Flash Size:   $ENV_FLASH_SIZE"
 _debug "Build Folder: $ENV_BUILD_FOLDER"
 _debug "Partitions csv file: $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV"
 _debug "`cat $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV`"
-_debug "$ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN $FIRMWARE_ADDR $ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN $SPIFFS_ADDR $ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN"
+_debug "$ESPTOOL --chip esp32 merge-bin --pad-to-size ${ENV_FLASH_SIZE}MB -o flash_image.bin $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN $FIRMWARE_ADDR $ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN $SPIFFS_ADDR $ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN"
 
-$ESPTOOL_PY --chip esp32 merge_bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin \
+$ESPTOOL --chip esp32 merge-bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin \
   $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN \
   $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN \
   $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN \
@@ -113,7 +113,34 @@ echo "[INFO] Running flash image in QEmu"
 _debug "QEmu timeout: $ENV_QEMU_TIMEOUT seconds"
 _debug "$QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true"
 
-($QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true | tee -a ./logs.txt) &
+log_file=./logs.txt
 
-sleep $ENV_QEMU_TIMEOUT
+($QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true | tee -a $log_file) &
+
+
+if [[ "$ENV_TIMEOUT_INT_RE" != "" ]]; then
+
+  _debug "Timing out in $ENV_QEMU_TIMEOUT seconds unless output matches '$ENV_TIMEOUT_INT_RE'"
+
+  timeout=$ENV_QEMU_TIMEOUT
+  interval=1
+
+  while ((timeout > 0)); do
+    sleep $interval
+    grep_result=`tail ${log_file} | grep "${ENV_TIMEOUT_INT_RE}"`
+    if [[ "$grep_result" =~ $ENV_TIMEOUT_INT_RE ]]; then
+      _debug "[INFO] Got interrupt signal from esp32 $timeout seconds before timeout";
+      break
+    fi
+    ((timeout -= interval))
+  done
+
+else
+
+  _debug "Timing out in $ENV_QEMU_TIMEOUT seconds"
+
+  sleep $ENV_QEMU_TIMEOUT
+
+fi
+
 killall qemu-system-xtensa || true
