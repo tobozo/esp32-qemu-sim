@@ -30,7 +30,7 @@ jobs:
           #build-properties: PSRAM:true # -DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue -mfix-esp32-psram-cache-strategy=memw
 
       - name: Run ESP32 project in QEmu
-        uses: tobozo/esp32-qemu-sim@${{ github.ref }}
+        uses: tobozo/esp32-qemu-sim@1.0.5
         with:
           debug: true
           psram: 2M
