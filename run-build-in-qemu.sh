@@ -15,7 +15,7 @@ QEMU_BIN="./qemu-git/build/qemu-system-xtensa"
 
 
 if [[ "$ENV_DEBUG" != "false" ]]; then
-  function _debug { echo "[DEBUG] $1"; }
+  function _debug { echo "[$(date +%H:%M:%S)][DEBUG] $1"; }
 else
   function _debug { return; }
 fi
@@ -120,6 +120,8 @@ log_file=./logs.txt
 
 if [[ "$ENV_TIMEOUT_INT_RE" != "" ]]; then
 
+  _debug "Timing out in $ENV_QEMU_TIMEOUT seconds unless output matches '$ENV_TIMEOUT_INT_RE'"
+
   timeout=$ENV_QEMU_TIMEOUT
   interval=1
 
@@ -127,13 +129,15 @@ if [[ "$ENV_TIMEOUT_INT_RE" != "" ]]; then
     sleep $interval
     grep_result=`tail ${log_file} | grep "${ENV_TIMEOUT_INT_RE}"`
     if [[ "$grep_result" =~ $ENV_TIMEOUT_INT_RE ]]; then
-      echo "[INFO] Got interrupt signal from esp32";
+      _debug "[INFO] Got interrupt signal from esp32 $timeout seconds before timeout";
       break
     fi
     ((timeout -= interval))
   done
 
 else
+
+  _debug "Timing out in $ENV_QEMU_TIMEOUT seconds"
 
   sleep $ENV_QEMU_TIMEOUT
 
