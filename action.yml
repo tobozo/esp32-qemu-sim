@@ -166,7 +166,8 @@ runs:
     - name: Upload logs as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Qemu Logs - ${{ inputs.chip }}
+        name: Qemu-Logs-${{ inputs.chip }}
+        overwrite: true
         path: |
           ./logs.txt
           ${{ inputs.build-folder }}/*.bin
