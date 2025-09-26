@@ -10,7 +10,7 @@
 
 
 
-ESPTOOL="./esptool/esptool.py"
+ESPTOOL="./esptool/esptool"
 QEMU_BIN="./qemu-git/build/qemu-system-xtensa"
 
 
@@ -24,7 +24,7 @@ function exit_with_error { echo "$1"; exit 1; }
 
 echo "[INFO] Validating tools"
 
-[[ ! -f "$ESPTOOL" ]] && exit_with_error "esptool.py is missing"
+[[ ! -f "$ESPTOOL" ]] && exit_with_error "esptool is missing"
 [[ ! -f "$QEMU_BIN" ]] && exit_with_error "qemu-system-xtensa is missing"
 
 echo "[INFO] Validating input data"
