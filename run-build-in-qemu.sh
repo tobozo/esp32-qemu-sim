@@ -12,7 +12,7 @@
 
 ESPTOOL="./esptool/esptool.py"
 QEMU_XTENSA_BIN="./qemu-git/build/qemu-system-xtensa"
-QEMU_RISCV_BIN="./qemu-git/build/qemu-system-riscv64"
+QEMU_RISCV_BIN="./qemu-git/build/qemu-system-riscv32"
 
 
 if [[ "$ENV_DEBUG" != "false" ]]; then
@@ -32,14 +32,20 @@ case "$ENV_CHIP" in
     "esp32")
         QEMU_BIN=$QEMU_XTENSA_BIN
         ENV_BOOTLOADER_ADDR=0x1000
+        # QEMU_ARGS="-M esp32 -m 4M"
+        # QEMU_BOOT_MODE_ARGS="-global driver=esp32.gpio,property=strap_mode,value=0x0f"
         ;;
     "esp32s3")
         QEMU_BIN=$QEMU_XTENSA_BIN
         ENV_BOOTLOADER_ADDR=0x0
+        # QEMU_ARGS="-M esp32s3 -m 32M"
+        # QEMU_BOOT_MODE_ARGS="-global driver=esp32s3.gpio,property=strap_mode,value=0x07"
         ;;
     "esp32c3")
         QEMU_BIN=$QEMU_RISCV_BIN
         ENV_BOOTLOADER_ADDR=0x0
+        # QEMU_ARGS="-M esp32c3"
+        # QEMU_BOOT_MODE_ARGS="-global driver=esp32c3.gpio,property=strap_mode,value=0x02"
         ;;
     *)
         exit_with_error "Unknown Chip $ENV_CHIP"

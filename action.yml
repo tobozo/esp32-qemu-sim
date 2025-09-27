@@ -107,7 +107,7 @@ runs:
         sudo apt-get update
         sudo apt-get install ninja-build cmake libglib2.0-dev libcrypt-dev libgcrypt20-dev libslirp-dev
         cd qemu-git
-        ./configure --target-list=xtensa-softmmu,riscv64-softmmu --enable-gcrypt --enable-debug --disable-strip --disable-user --disable-capstone --disable-vnc --disable-sdl --disable-gtk
+        ./configure --target-list=xtensa-softmmu,riscv32-softmmu --enable-gcrypt --enable-debug --disable-strip --disable-user --disable-capstone --disable-vnc --disable-sdl --disable-gtk
         ninja -C build
 
     # Pull python 3.11 for esptool
