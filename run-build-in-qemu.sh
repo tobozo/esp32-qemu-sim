@@ -48,14 +48,6 @@ esac
 
 echo "[INFO] Validating tools"
 
-if [[ "$ENV_CHIP" == "esp32c3" ]]; then
-
-  # ENV_BOOTLOADER_ADDR=0x0
-
-else
-  QEMU_BIN=$QEMU_XTENSA_BIN
-fi
-
 [[ ! -f "$QEMU_BIN" ]] && exit_with_error "qemu binary is missing for $ENV_CHIP"
 [[ ! -f "$ESPTOOL" ]] && exit_with_error "esptool is missing at path: $ESPTOOL"
 
