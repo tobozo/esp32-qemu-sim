@@ -24,7 +24,7 @@ inputs:
     default: "disabled"
 
   qemu-timeout:
-    description: "QEmu timeout"
+    description: "QEmu timeout (seconds)"
     default: "60"
 
   timeout-interrupt-regex:
@@ -35,9 +35,9 @@ inputs:
     description:  "Build folder"
     default: ./build
 
-  bootloader-address:
-    description: "Bootloader Address"
-    default: "0x1000"
+  # bootloader-address:
+  #   description: "Bootloader Address"
+  #   default: "0x1000"
 
   partitions-address:
     description: "Partitions address"
@@ -107,7 +107,7 @@ runs:
         sudo apt-get update
         sudo apt-get install ninja-build cmake libglib2.0-dev libcrypt-dev libgcrypt20-dev libslirp-dev
         cd qemu-git
-        ./configure --target-list=xtensa-softmmu --enable-gcrypt --enable-debug --disable-strip --disable-user --disable-capstone --disable-vnc --disable-sdl --disable-gtk
+        ./configure --target-list=xtensa-softmmu,riscv64-softmmu --enable-gcrypt --enable-debug --disable-strip --disable-user --disable-capstone --disable-vnc --disable-sdl --disable-gtk
         ninja -C build
 
     # Pull python 3.11 for esptool
@@ -149,7 +149,7 @@ runs:
         ENV_QEMU_TIMEOUT : ${{ inputs.qemu-timeout }}
         ENV_TIMEOUT_INT_RE: ${{ inputs.timeout-interrupt-regex }}
         ENV_BUILD_FOLDER : ${{ inputs.build-folder }}
-        ENV_BOOTLOADER_ADDR : ${{ inputs.bootloader-address }}
+        # ENV_BOOTLOADER_ADDR : ${{ inputs.bootloader-address }}
         ENV_BOOTLOADER_BIN : ${{ inputs.bootloader-bin }}
         ENV_PARTITIONS_ADDR : ${{ inputs.partitions-address }}
         ENV_PARTITIONS_CSV : ${{ inputs.partitions-csv }}

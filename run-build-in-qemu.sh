@@ -11,7 +11,8 @@
 
 
 ESPTOOL="./esptool/esptool.py"
-QEMU_BIN="./qemu-git/build/qemu-system-xtensa"
+QEMU_XTENSA_BIN="./qemu-git/build/qemu-system-xtensa"
+QEMU_RISCV_BIN="./qemu-git/build/qemu-system-riscv64"
 
 
 if [[ "$ENV_DEBUG" != "false" ]]; then
@@ -22,12 +23,45 @@ fi
 
 function exit_with_error { echo "$1"; exit 1; }
 
+echo "[INFO] Validating target chip"
+
+# TODO query `$QEMU_BIN -machine ? | grep esp32` and compare
+[[ "$ENV_CHIP" =~ ^esp32(c3|s3)?$ ]] || exit_with_error "Invalid chip name, valid names are: esp32, esp32c3, esp32s3"
+
+case "$ENV_CHIP" in
+    "esp32")
+        QEMU_BIN=$QEMU_XTENSA_BIN
+        ENV_BOOTLOADER_ADDR=0x1000
+        ;;
+    "esp32s3")
+        QEMU_BIN=$QEMU_XTENSA_BIN
+        ENV_BOOTLOADER_ADDR=0x0
+        ;;
+    "esp32c3")
+        QEMU_BIN=$QEMU_RISCV_BIN
+        ENV_BOOTLOADER_ADDR=0x0
+        ;;
+    *)
+        exit_with_error "Unknown Chip $ENV_CHIP"
+        ;;
+esac
+
 echo "[INFO] Validating tools"
 
-[[ ! -f "$ESPTOOL" ]] && exit_with_error "esptool is missing"
-[[ ! -f "$QEMU_BIN" ]] && exit_with_error "qemu-system-xtensa is missing"
+if [[ "$ENV_CHIP" == "esp32c3" ]]; then
+
+  # ENV_BOOTLOADER_ADDR=0x0
+
+else
+  QEMU_BIN=$QEMU_XTENSA_BIN
+fi
+
+[[ ! -f "$QEMU_BIN" ]] && exit_with_error "qemu binary is missing for $ENV_CHIP"
+[[ ! -f "$ESPTOOL" ]] && exit_with_error "esptool is missing at path: $ESPTOOL"
+
 
 echo "[INFO] Validating input data"
+
 
 [[ "$ENV_BUILD_FOLDER" == "" ]] && exit_with_error "No build folder provided"
 [[ ! -d "$ENV_BUILD_FOLDER" ]] && exit_with_error "No build folder found, aborting"
@@ -91,9 +125,6 @@ fi
 if [[ "$SPIFFS_ADDR" != "$ENV_SPIFFS_ADDR" ]]; then
   echo "[WARNING] SPIFFS address mismatch (csv=$SPIFFS_ADDR, workflow=$ENV_SPIFFS_ADDR)"
 fi
-
-# TODO query `$QEMU_BIN -machine ? | grep esp32` and compare
-[[ "$ENV_CHIP" =~ ^esp32(c3|s3)?$ ]] || exit_with_error "Invalid chip name, valid names are: esp32, esp32c3, esp32s3"
 
 
 echo "[INFO] Building flash image for QEmu"
