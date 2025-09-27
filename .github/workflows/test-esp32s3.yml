@@ -1,0 +1,47 @@
+
+on: [push,workflow_dispatch]
+
+jobs:
+  hello_world_job:
+
+    runs-on: ubuntu-latest
+    name: A job to say hello
+
+    env:
+      SKETCH_REPO: tobozo/esp32-qemu-sim
+      SKETCH_NAME: test.ino
+
+    steps:
+
+      - name: Checkout ESP32 project
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.SKETCH_REPO }} # pull the examples/HelloWorld/HelloWorld.ino from your repo
+          ref: ${{ github.event.pull_request.head.sha }}
+
+
+      - name: Compile ESP32S3 project
+        uses: ArminJo/arduino-test-compile@v3.2.0
+        with:
+          platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
+          arduino-board-fqbn: esp32:esp32:esp32s3:FlashMode=dio,FlashFreq=40,FlashSize=4M,DebugLevel=debug,PSRAM=enabled
+          arduino-platform: esp32:esp32@3.3.1
+          sketch-names: ${{ env.SKETCH_NAME }}
+          set-build-path: true # build in the sketch folder
+          #build-properties: PSRAM:true # -DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue -mfix-esp32-psram-cache-strategy=memw
+
+      - name: Run ESP32S3 project in QEmu
+        uses: tobozo/esp32-qemu-sim@main
+        with:
+          debug: true
+          chip: esp32s3
+          psram: 2M
+          build-folder: test/build
+          partitions-csv: partitions.csv
+          firmware-bin: test.ino.bin
+          bootloader-bin: test.ino.bootloader.bin
+          partitions-bin: test.ino.partitions.bin
+          spiffs-bin: test.ino.spiffs.bin
+          timeout-interrupt-regex: "Test Complete"
+
+
