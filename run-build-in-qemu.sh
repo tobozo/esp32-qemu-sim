@@ -10,7 +10,7 @@
 
 
 
-ESPTOOL="./esptool/esptool.py"
+ESPTOOL="./esptool/esptool"
 QEMU_BIN="./qemu-git/build/qemu-system-xtensa"
 
 
@@ -24,7 +24,7 @@ function exit_with_error { echo "$1"; exit 1; }
 
 echo "[INFO] Validating tools"
 
-[[ ! -f "$ESPTOOL" ]] && exit_with_error "esptool.py is missing"
+[[ ! -f "$ESPTOOL" ]] && exit_with_error "esptool is missing"
 [[ ! -f "$QEMU_BIN" ]] && exit_with_error "qemu-system-xtensa is missing"
 
 echo "[INFO] Validating input data"
@@ -92,6 +92,9 @@ if [[ "$SPIFFS_ADDR" != "$ENV_SPIFFS_ADDR" ]]; then
   echo "[WARNING] SPIFFS address mismatch (csv=$SPIFFS_ADDR, workflow=$ENV_SPIFFS_ADDR)"
 fi
 
+# TODO query `$QEMU_BIN -machine ? | grep esp32` and compare
+[[ "$ENV_CHIP" =~ ^esp32(c3|s3)?$ ]] || exit_with_error "Invalid chip name, valid names are: esp32, esp32c3, esp32s3"
+
 
 echo "[INFO] Building flash image for QEmu"
 
@@ -99,9 +102,9 @@ _debug "Flash Size:   $ENV_FLASH_SIZE"
 _debug "Build Folder: $ENV_BUILD_FOLDER"
 _debug "Partitions csv file: $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV"
 _debug "`cat $ENV_BUILD_FOLDER/$ENV_PARTITIONS_CSV`"
-_debug "$ESPTOOL --chip esp32 merge-bin --pad-to-size ${ENV_FLASH_SIZE}MB -o flash_image.bin $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN $FIRMWARE_ADDR $ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN $SPIFFS_ADDR $ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN"
+_debug "$ESPTOOL --chip $ENV_CHIP merge-bin --pad-to-size ${ENV_FLASH_SIZE}MB -o flash_image.bin $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN $FIRMWARE_ADDR $ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN $SPIFFS_ADDR $ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN"
 
-$ESPTOOL --chip esp32 merge-bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin \
+$ESPTOOL --chip $ENV_CHIP merge-bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_image.bin \
   $ENV_BOOTLOADER_ADDR $ENV_BUILD_FOLDER/$ENV_BOOTLOADER_BIN \
   $ENV_PARTITIONS_ADDR $ENV_BUILD_FOLDER/$ENV_PARTITIONS_BIN \
   $OTADATA_ADDR $ENV_BUILD_FOLDER/$ENV_OTADATA_BIN \
@@ -111,11 +114,11 @@ $ESPTOOL --chip esp32 merge-bin --fill-flash-size ${ENV_FLASH_SIZE}MB -o flash_i
 
 echo "[INFO] Running flash image in QEmu"
 _debug "QEmu timeout: $ENV_QEMU_TIMEOUT seconds"
-_debug "$QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true"
+_debug "$QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.$ENV_CHIP.timg,property=wdt_disable,value=true"
 
 log_file=./logs.txt
 
-($QEMU_BIN -nographic -machine esp32 $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.esp32.timg,property=wdt_disable,value=true | tee -a $log_file) &
+($QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=flash_image.bin,if=mtd,format=raw -global driver=timer.$ENV_CHIP.timg,property=wdt_disable,value=true | tee -a $log_file) &
 
 
 if [[ "$ENV_TIMEOUT_INT_RE" != "" ]]; then

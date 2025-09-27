@@ -11,6 +11,10 @@ inputs:
     description: "Add more verbosity"
     default: "false"
 
+  chip:
+    description: "Chip (e.g. esp32)"
+    default: "esp32"
+
   flash-size:
     description: "Flash Size (MB)"
     default: "4"
@@ -139,6 +143,7 @@ runs:
         # Passing parameters to the script by setting the appropriate ENV_* variables.
         # Direct passing as arguments is not possible because of blanks in the arguments.
         ENV_DEBUG: ${{ inputs.debug }}
+        ENV_CHIP: ${{ inputs.chip }}
         ENV_FLASH_SIZE : ${{ inputs.flash-size }}
         ENV_PSRAM: ${{ inputs.psram }}
         ENV_QEMU_TIMEOUT : ${{ inputs.qemu-timeout }}
@@ -161,7 +166,8 @@ runs:
     - name: Upload logs as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Qemu Logs
+        name: Qemu-Logs-${{ inputs.chip }}
+        overwrite: true
         path: |
           ./logs.txt
           ${{ inputs.build-folder }}/*.bin
