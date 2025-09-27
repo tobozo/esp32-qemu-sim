@@ -35,10 +35,6 @@ inputs:
     description:  "Build folder"
     default: ./build
 
-  # bootloader-address:
-  #   description: "Bootloader Address"
-  #   default: "0x1000"
-
   partitions-address:
     description: "Partitions address"
     default: "0x8000"
@@ -91,9 +87,6 @@ runs:
       if: steps.cache-qemu.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
       with:
-        # Note: this should be espressif/qemu but this one has a fix for flash size
-        #repository: listout/qemu
-        #ref: 'fix-flash-size'
         repository: espressif/qemu
         ref: 'esp-develop'
         path: './qemu-git'
@@ -149,7 +142,6 @@ runs:
         ENV_QEMU_TIMEOUT : ${{ inputs.qemu-timeout }}
         ENV_TIMEOUT_INT_RE: ${{ inputs.timeout-interrupt-regex }}
         ENV_BUILD_FOLDER : ${{ inputs.build-folder }}
-        # ENV_BOOTLOADER_ADDR : ${{ inputs.bootloader-address }}
         ENV_BOOTLOADER_BIN : ${{ inputs.bootloader-bin }}
         ENV_PARTITIONS_ADDR : ${{ inputs.partitions-address }}
         ENV_PARTITIONS_CSV : ${{ inputs.partitions-csv }}
