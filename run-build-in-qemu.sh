@@ -175,4 +175,4 @@ else
 
 fi
 
-killall qemu-system-xtensa || true
+killall `basename $QEMU_BIN` || true
