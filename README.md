@@ -20,6 +20,16 @@ Use `tobozo/esp32-qemu-sim` github action to run an esp32 compiled binary in [QE
 ## Options
 
 
+### Chip name
+
+Supported chips are: `esp32`, `esp32s3`, `esp32c3`.
+
+```yaml
+  with:
+    chip: esp32c3
+```
+
+
 ### Flash Options
 
 Specify a different flash size and/or psram size.
@@ -92,14 +102,13 @@ Note: the default file names can be overriden, but should always reside in the `
 ```
 
 
-### Bootloader Address
+### Partitions Address
 
-[Experimental] Optionally change the addresses for bootloader.bin and partitions.bin.
-The other addresses are extracted form the partitions.csv file.
+[Experimental] Optionally change the addresse for partitions.bin.
+The other addresses are extracted form the partitions.csv file or guessed from the chip name
 
 ```yaml
   with:
-    bootloader-address: "0x1000"
     partitions-address: "0x8000"
 ```
 
@@ -130,7 +139,7 @@ jobs:
         with:
           platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
           arduino-board-fqbn: esp32:esp32:esp32:FlashMode=dio,FlashFreq=80,FlashSize=4M
-          arduino-platform: esp32:esp32@2.0.7
+          arduino-platform: esp32:esp32@3.3.1
           sketch-names: HelloWorld.ino # Will build "HelloWorld.ino"
           set-build-path: true # build in the sketch folder
           # extra-arduino-lib-install-args: --no-deps
