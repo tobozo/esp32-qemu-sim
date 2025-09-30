@@ -104,7 +104,7 @@ Note: the default file names can be overriden, but should always reside in the `
 
 ### Partitions Address
 
-[Experimental] Optionally change the addresse for partitions.bin.
+[Experimental] Optionally change the address for partitions.bin.
 The other addresses are extracted form the partitions.csv file or guessed from the chip name
 
 ```yaml

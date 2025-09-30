@@ -15,10 +15,6 @@ inputs:
     description: "Chip (e.g. esp32)"
     default: "esp32"
 
-  flash-size:
-    description: "Flash Size (MB)"
-    default: "4"
-
   psram:
     description: "PSRam"
     default: "disabled"
@@ -31,9 +27,21 @@ inputs:
     description: "Interrupt string"
     default: ""
 
+  # Path to merged binary, overrides all subsequent inputs
+
+  flash-image: "Flash Image"
+    default: ""
+
+  # Decomposed flash image elements, will be merged using esptool.
+  # All inputs below are ignored if `flash-image` is set
+
   build-folder:
     description:  "Build folder"
     default: ./build
+
+  flash-size:
+    description: "Flash Size (MB)"
+    default: "4"
 
   partitions-address:
     description: "Partitions address"
@@ -141,6 +149,7 @@ runs:
         ENV_PSRAM: ${{ inputs.psram }}
         ENV_QEMU_TIMEOUT : ${{ inputs.qemu-timeout }}
         ENV_TIMEOUT_INT_RE: ${{ inputs.timeout-interrupt-regex }}
+        ENV_FLASH_IMAGE: ${{ inputs.flash-image }}
         ENV_BUILD_FOLDER : ${{ inputs.build-folder }}
         ENV_BOOTLOADER_BIN : ${{ inputs.bootloader-bin }}
         ENV_PARTITIONS_ADDR : ${{ inputs.partitions-address }}
@@ -164,4 +173,5 @@ runs:
           ./logs.txt
           ${{ inputs.build-folder }}/*.bin
           ${{ inputs.build-folder }}/*.csv
+          ${{ inputs.flash-image }}
 

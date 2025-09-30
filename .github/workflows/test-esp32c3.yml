@@ -27,7 +27,6 @@ jobs:
           arduino-platform: esp32:esp32@3.3.1
           sketch-names: ${{ env.SKETCH_NAME }}
           set-build-path: true # build in the sketch folder
-          #build-properties: PSRAM:true # -DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue -mfix-esp32-psram-cache-strategy=memw
 
       - name: Run ESP32C3 project in QEmu
         uses: tobozo/esp32-qemu-sim@main

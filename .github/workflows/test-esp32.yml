@@ -27,7 +27,6 @@ jobs:
           arduino-platform: esp32:esp32@3.3.1
           sketch-names: ${{ env.SKETCH_NAME }}
           set-build-path: true # build in the sketch folder
-          #build-properties: PSRAM:true # -DBOARD_HAS_PSRAM -mfix-esp32-psram-cache-issue -mfix-esp32-psram-cache-strategy=memw
 
       - name: Run ESP32 project in QEmu
         uses: tobozo/esp32-qemu-sim@main
@@ -35,11 +34,12 @@ jobs:
           debug: true
           chip: esp32
           psram: 2M
-          build-folder: test/build
-          partitions-csv: partitions.csv
-          firmware-bin: test.ino.bin
-          bootloader-bin: test.ino.bootloader.bin
-          partitions-bin: test.ino.partitions.bin
-          spiffs-bin: test.ino.spiffs.bin
+          flash-image: test/build/test.ino.merged.bin
+          # build-folder: test/build
+          # partitions-csv: partitions.csv
+          # firmware-bin: test.ino.bin
+          # bootloader-bin: test.ino.bootloader.bin
+          # partitions-bin: test.ino.partitions.bin
+          # spiffs-bin: test.ino.spiffs.bin
           timeout-interrupt-regex: "Test Complete"
 
