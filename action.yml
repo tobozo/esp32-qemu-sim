@@ -29,7 +29,8 @@ inputs:
 
   # Path to merged binary, overrides all subsequent inputs
 
-  flash-image: "Flash Image"
+  flash-image:
+    description: "Flash Image"
     default: ""
 
   # Decomposed flash image elements, will be merged using esptool.
