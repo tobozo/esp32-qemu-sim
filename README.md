@@ -63,11 +63,15 @@ A timeout can be interrupted when Qemu output matches a given string or regex.
 
 Valid psram size values are `(none)`, `2M`, `4M`, `8M`, `16M`, `32M`.
 
+-------
 
 ## Flash Options
 
-When `flash-image` input is not set, esp32-qemu-sim can take care of merging the binary with esptool.
-Alternatively if `flash-image` is set, all subsequent inputs will be ignored.
+When `flash-image` input **is not** set, esp32-qemu-sim can take care of merging the binary with esptool.
+Alternatively if `flash-image` **is** set, all inputs related to flash options will be ignored.
+This is only useful when SPIFFS/NVS partitions are preloaded with user data, and/or the firmware builder didn't create a merged binary.
+
+If possible, always prefer using the `flash-image` option with a merged binary.
 
 
 ### Project Build Folder
@@ -81,7 +85,7 @@ The default path to the ESP32 project binaries is `./build`, but your mileage ma
     build-folder: ./my-build-folder
 ```
 
-## Flash Size
+### Flash Size
 
 Specify a different flash size and/or psram size.
 
