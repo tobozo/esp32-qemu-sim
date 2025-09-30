@@ -27,6 +27,7 @@ echo "[INFO] Validating target chip"
 
 # TODO query `$QEMU_BIN -machine ? | grep esp32` and compare
 [[ "$ENV_CHIP" =~ ^esp32(c3|s3)?$ ]] || exit_with_error "Invalid chip name, valid names are: esp32, esp32c3, esp32s3"
+[[ "$ENV_PSRAM" =~ ^(2M|4M|8M|16M|32M)$ ]] && ENV_PSRAM="-m $ENV_PSRAM" || ENV_PSRAM=""
 
 case "$ENV_CHIP" in
     "esp32")
@@ -52,10 +53,7 @@ case "$ENV_CHIP" in
         ;;
 esac
 
-
 [[ ! -f "$QEMU_BIN" ]] && exit_with_error "qemu binary is missing for $ENV_CHIP"
-[[ "$ENV_PSRAM" =~ ^(2M|4M|8M|32M)$ ]] && ENV_PSRAM="-m $ENV_PSRAM" || ENV_PSRAM=""
-
 
 
 if [[ "$ENV_FLASH_IMAGE" != "" ]]; then

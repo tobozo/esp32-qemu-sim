@@ -7,9 +7,11 @@ Use `tobozo/esp32-qemu-sim` github action to run an esp32 compiled binary in [QE
   - name: 'ESP32 QEmu Runner'
   - uses: tobozo/esp32-qemu-sim@v1
     with:
-      flash-size: 4
-      build-folder: ./build
+      chip: esp32c3
+      flash-image: Sketch/build/Sketch.ino.merged.bin
 ```
+
+:warning: when `flash-image` is set, all flash options are ignored.
 
 
 ## Requirements
@@ -27,22 +29,6 @@ Supported chips are: `esp32`, `esp32s3`, `esp32c3`.
 ```yaml
   with:
     chip: esp32c3
-```
-
-
-### Flash Options
-
-Specify a different flash size and/or psram size.
-
-Valid flash size values are `2`, `4`, `8`, `16`.
-
-Valid psram size values are `(none)`, `2M`, `4M`.
-
-
-```yaml
-  with:
-    flash-size: 4
-    psram: 2M
 ```
 
 ### QEmu timeout
@@ -65,6 +51,46 @@ A timeout can be interrupted when Qemu output matches a given string or regex.
     timeout-interrupt-regex: "Test Complete"
     # timeout-interrupt-regex: "/^Test Complete$/"
     # timeout-interrupt-regex: "/(Test Complete)|(guru meditation)/"
+```
+
+
+### Device Options
+
+```yaml
+  with:
+    psram: 2M
+```
+
+Valid psram size values are `(none)`, `2M`, `4M`, `8M`, `16M`, `32M`.
+
+
+## Flash Options
+
+When `flash-image` input is not set, esp32-qemu-sim can take care of merging the binary with esptool.
+Alternatively if `flash-image` is set, all subsequent inputs will be ignored.
+
+
+### Project Build Folder
+
+/!\ The ESP32 build folder must be set and populated in the workflow prior to calling the action.
+The default path to the ESP32 project binaries is `./build`, but your mileage may vary:
+
+
+```yaml
+  with:
+    build-folder: ./my-build-folder
+```
+
+## Flash Size
+
+Specify a different flash size and/or psram size.
+
+Valid flash size values are `2`, `4`, `8`, `16`.
+
+
+```yaml
+  with:
+    flash-size: 4
 ```
 
 
@@ -148,13 +174,16 @@ jobs:
       - name: Run ESP32 project in QEmu
         uses: tobozo/esp32-qemu-sim@main
         with:
-          # Set the build folder and file names for esp32-qemu-sim
-          build-folder: examples/HelloWorld/build
-          partitions-csv: partitions.csv
-          firmware-bin: HelloWorld.ino.bin
-          bootloader-bin: HelloWorld.ino.bootloader.bin
-          partitions-bin: HelloWorld.ino.partitions.bin
-          spiffs-bin: HelloWorld.ino.spiffs.bin
+          chip: esp32 
+          ## Set the build folder and file names for esp32-qemu-sim
+          flash-image: examples/HelloWorld/build/HelloWorld.ino.merged.bin
+          ## OR set the flash image elements separately
+          # build-folder: examples/HelloWorld/build
+          # partitions-csv: partitions.csv
+          # firmware-bin: HelloWorld.ino.bin
+          # bootloader-bin: HelloWorld.ino.bootloader.bin
+          # partitions-bin: HelloWorld.ino.partitions.bin
+          # spiffs-bin: HelloWorld.ino.spiffs.bin
 ```
 
 ## Roadmap:
