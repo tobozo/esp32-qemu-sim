@@ -10,7 +10,7 @@
 
 
 
-ESPTOOL="./esptool/esptool"
+ESPTOOL="./esptool/esptool.py"
 QEMU_XTENSA_BIN="./qemu-git/build/qemu-system-xtensa"
 QEMU_RISCV_BIN="./qemu-git/build/qemu-system-riscv32"
 
