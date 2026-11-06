@@ -14,13 +14,13 @@ jobs:
     steps:
 
       - name: Checkout ESP32 project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           repository: ${{ env.SKETCH_REPO }} # pull the examples/HelloWorld/HelloWorld.ino from your repo
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Compile ESP32S3 project
-        uses: ArminJo/arduino-test-compile@v3.2.0
+        uses: ArminJo/arduino-test-compile@v3
         with:
           platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
           arduino-board-fqbn: esp32:esp32:esp32s3:FlashMode=dio,FlashSize=4M,DebugLevel=debug,PSRAM=enabled
