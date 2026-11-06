@@ -5,7 +5,7 @@ Use `tobozo/esp32-qemu-sim` github action to run an esp32 compiled binary in [QE
 
 ```yaml
   - name: 'ESP32 QEmu Runner'
-  - uses: tobozo/esp32-qemu-sim@v1
+  - uses: tobozo/esp32-qemu-sim@v2
     with:
       chip: esp32c3
       flash-image: Sketch/build/Sketch.ino.merged.bin
@@ -176,7 +176,7 @@ jobs:
           # extra-arduino-cli-args: "--warnings default " # see https://github.com/ArminJo/arduino-test-compile/issues/28
 
       - name: Run ESP32 project in QEmu
-        uses: tobozo/esp32-qemu-sim@main
+        uses: tobozo/esp32-qemu-sim@v2
         with:
           chip: esp32 
           ## Set the build folder and file names for esp32-qemu-sim
