@@ -236,9 +236,6 @@ if [[ "$ENV_CHIP" == "esp32p4" ]]; then
 
   ELF_FILE=$(find $ENV_BUILD_FOLDER -name "*.ino.elf" -print -quit)
   ADDR2LINE=$(find ~/.arduino15/packages/esp32/tools/ -name "riscv32-esp-elf-addr2line" -print -quit)
-  READELF=$(find ~/.arduino15/packages/esp32/tools/ -name "riscv32-esp-elf-readelf" -print -quit)
-
-  echo "Target binary: $ELF_FILE"
 
   if [ -z "$ELF_FILE" ] || [ -z "$ADDR2LINE" ]; then
     echo "❌ Critical Error: Toolchain binaries missing."
@@ -246,37 +243,26 @@ if [[ "$ENV_CHIP" == "esp32p4" ]]; then
   fi
 
   if grep -q "MCAUSE" $log_file; then
-    echo "⚠️ Crash Signature Found! Calculating section offsets..."
+    echo "⚠️ Crash Signature Found! Resolving registers..."
 
-    # 1. Dynamically extract the true virtual base of the .text section inside the ELF
-    ELF_TEXT_BASE=$( $READELF -S "$ELF_FILE" | grep " .text " | awk '{print "0x"$5}' )
-    echo "ELF text section base is: $ELF_TEXT_BASE"
+    # Extract the exact faulting execution vector address directly from the INTLEVEL location
+    FAULT_ADDR=$(grep "INTLEVEL" $log_file | awk -F'INTLEVEL:' '{print $2}' | awk '{print $1}')
 
-    # 2. Extract code block execution ranges from the crash log
-    CRASH_ADDRESSES=$(grep -oE "0x4f(c[0-9a-fA-F]|d[0-9a-fA-F]|e[0-9a-fA-F]|f[0-3])[0-9a-fA-F]{4}" $log_file | sort -u)
+    # Also try to grab the last valid Return Address (RA) from the text data chunk if present
+    RA_ADDR=$(grep -oE "4ffbcd[0-9a-fA-F]: [0-9a-fA-F]{8} [0-9a-fA-F]{8} [0-9a-fA-F]{8} [0-9a-fA-F]{8}" $log_file | awk '{print $5}' | head -n 1)
 
-    echo "=================== DECODED STACK TRACE ==================="
-    for addr in $CRASH_ADDRESSES; do
-      # Standard absolute decoding lookup
-      RESULT=$( $ADDR2LINE -pfia -e "$ELF_FILE" "$addr" )
+    echo "=================== DECODED CRASH LOCATION ==================="
+    if [ -n "$FAULT_ADDR" ]; then
+      echo "💥 Exact instruction causing the crash ($FAULT_ADDR):"
+      $ADDR2LINE -pfi -e "$ELF_FILE" "$FAULT_ADDR"
+    fi
 
-      # If absolute path fails to bind, run a relative section offset calculation
-      if [[ "$RESULT" == *"?? ??:0"* || -z "$RESULT" ]]; then
-          # Strip the absolute mapping offset explicitly to force relative index verification
-          RESULT_RELATIVE=$( $ADDR2LINE -pfia -e "$ELF_FILE" "$addr" )
-          if [[ "$RESULT_RELATIVE" != *"?? ??:0"* && -n "$RESULT_RELATIVE" ]]; then
-            echo "📍 Address $addr (Relative .text) maps to:"
-            echo "   $RESULT_RELATIVE"
-            echo "-----------------------------------------------------------"
-            continue
-          fi
-      else
-          echo "📍 Address $addr (Absolute) maps to:"
-          echo "   $RESULT"
-          echo "-----------------------------------------------------------"
-      fi
-    done
-    echo "==========================================================="
+    if [ -n "$RA_ADDR" ]; then
+      echo ""
+      echo "↩️ Likely returning/parent function ($RA_ADDR):"
+      $ADDR2LINE -pfi -e "$ELF_FILE" "$RA_ADDR"
+    fi
+    echo "=============================================================="
   else
     echo "✅ No Guru Meditation error found in the emulation log."
   fi
