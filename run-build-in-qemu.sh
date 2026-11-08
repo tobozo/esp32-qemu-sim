@@ -53,7 +53,7 @@ case "$ENV_CHIP" in
     "esp32p4")
         QEMU_BIN=$QEMU_RISCV_BIN
         ENV_BOOTLOADER_ADDR=0x2000
-        QEMU_GLOBALS=""
+        QEMU_GLOBALS="-global driver=$ENV_CHIP.gpio,property=strap_mode,value=0x0f"
         # QEMU_ARGS="-M esp32p4"
         # QEMU_BOOT_MODE_ARGS="-global driver=esp32p4.gpio,property=strap_mode,value=0x02"
         ;;
