@@ -174,5 +174,6 @@ runs:
           ./logs.txt
           ${{ inputs.build-folder }}/*.bin
           ${{ inputs.build-folder }}/*.csv
+          ${{ inputs.build-folder }}/*.elf
           ${{ inputs.flash-image }}
 

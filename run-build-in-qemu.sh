@@ -170,7 +170,7 @@ fi
 
 echo "[INFO] Running flash image in QEmu"
 _debug "QEmu timeout: $ENV_QEMU_TIMEOUT seconds"
-_debug "$QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=$QEMU_FLASH_IMAGE,if=mtd,format=raw -global driver=timer.$ENV_CHIP.timg,property=wdt_disable,value=true"
+_debug "$QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=$QEMU_FLASH_IMAGE,if=mtd,format=raw $QEMU_GLOBALS"
 
 log_file=./logs.txt
 
