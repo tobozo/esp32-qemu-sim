@@ -263,7 +263,7 @@ if [[ "$ENV_CHIP" == "esp32p4" ]]; then
       # If absolute path fails to bind, run a relative section offset calculation
       if [[ "$RESULT" == *"?? ??:0"* || -z "$RESULT" ]]; then
           # Strip the absolute mapping offset explicitly to force relative index verification
-          RESULT_RELATIVE=$( $ADDR2LINE -pfia -j .text -e "$ELF_FILE" "$addr" )
+          RESULT_RELATIVE=$( $ADDR2LINE -pfia -e "$ELF_FILE" "$addr" )
           if [[ "$RESULT_RELATIVE" != *"?? ??:0"* && -n "$RESULT_RELATIVE" ]]; then
             echo "📍 Address $addr (Relative .text) maps to:"
             echo "   $RESULT_RELATIVE"
