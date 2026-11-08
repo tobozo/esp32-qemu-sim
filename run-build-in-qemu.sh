@@ -241,15 +241,19 @@ if [[ "$ENV_CHIP" == "esp32p4" ]]; then
     echo "⚠️ Crash detected! Resolving addresses..."
     # Regex to pull all memory addresses matching the ESP32-P4 code execution block
     # Greps anything matching 0x4fXXXXXX, filters down to unique addresses, and groups into a string
-    CRASH_ADDRESSES=$(grep -oE "0x4f[0-9a-fA-F]{6}" $log_file | sort -u | tr '\n' ' ')
-    if [ -n "$CRASH_ADDRESSES" ]; then
-      echo "Extracted target addresses: $CRASH_ADDRESSES"
-      echo "=================== DECODED STACK TRACE ==================="
-      $ADDR2LINE -pfia -e "$ELF_FILE" $CRASH_ADDRESSES
-      echo "==========================================================="
-    else
-      echo "Could not parse code segment addresses from the register block."
-    fi
+    CRASH_ADDRESSES=$(grep -oE "0x4f(c[0-9a-fA-F]|d[0-9a-fA-F]|e[0-9a-fA-F]|f[0-3])[0-9a-fA-F]{4}" $log_file | sort -u)
+    echo "=================== DECODED STACK TRACE ==================="
+    for addr in $CRASH_ADDRESSES; do
+      # Decode each address individually to bypass toolchain string limits
+      RESULT=$($ADDR2LINE -pfi -e "$ELF_FILE" "$addr")
+      # Filter out entries that don't belong to any known code instruction block
+      if [[ "$RESULT" != *"?? ??:0"* ]]; then
+        echo "📍 Address $addr maps to:"
+        echo "   $RESULT"
+        echo "-----------------------------------------------------------"
+      fi
+    done
+    echo "==========================================================="
   else
     echo "No hardware crash signature matched in log."
   fi
