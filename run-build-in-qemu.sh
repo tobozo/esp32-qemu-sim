@@ -228,3 +228,27 @@ else
 fi
 
 killall `basename $QEMU_BIN` || true
+
+
+if [[ "$ENV_CHIP" == "esp32p4" ]]; then
+  ELF_FILE=$(find $ENV_BUILD_FOLDER -name "*.ino.elf" -print -quit)
+  echo "Found ELF binary: $ELF_FILE"
+  ADDR2LINE=$(find ~/.arduino15/packages/esp32/tools/ -name "riscv32-esp-elf-addr2line" -print -quit)
+  echo "Found Toolchain: $ADDR2LINE"
+  if grep -q "MCAUSE" $log_file; then
+    echo "⚠️ Crash detected! Resolving addresses..."
+    # Regex to pull all memory addresses matching the ESP32-P4 code execution block
+    # Greps anything matching 0x4fXXXXXX, filters down to unique addresses, and groups into a string
+    CRASH_ADDRESSES=$(grep -oE "0x4f[0-9a-fA-F]{6}" $log_file | sort -u | tr '\n' ' ')
+    if [ -n "$CRASH_ADDRESSES" ]; then
+      echo "Extracted target addresses: $CRASH_ADDRESSES"
+      echo "=================== DECODED STACK TRACE ==================="
+      $ADDR2LINE -pfia -e "$ELF_FILE" $CRASH_ADDRESSES
+      echo "==========================================================="
+    else
+      echo "Could not parse code segment addresses from the register block."
+    fi
+  else
+    echo "No hardware crash signature matched in log."
+  fi
+fi
