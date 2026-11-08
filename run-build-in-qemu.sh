@@ -51,8 +51,8 @@ case "$ENV_CHIP" in
     "esp32p4")
         QEMU_BIN=$QEMU_RISCV_BIN
         ENV_BOOTLOADER_ADDR=0x2000
-        # QEMU_ARGS="-M esp32c3"
-        # QEMU_BOOT_MODE_ARGS="-global driver=esp32c3.gpio,property=strap_mode,value=0x02"
+        # QEMU_ARGS="-M esp32p4"
+        # QEMU_BOOT_MODE_ARGS="-global driver=esp32p4.gpio,property=strap_mode,value=0x02"
         ;;
     *)
         exit_with_error "Unknown Chip $ENV_CHIP"
