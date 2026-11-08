@@ -29,6 +29,8 @@ echo "[INFO] Validating target chip"
 [[ "$ENV_CHIP" =~ ^esp32(c3|s3|p4)?$ ]] || exit_with_error "Invalid chip name, valid names are: esp32, esp32c3, esp32s3, esp32p4 (experimental)"
 [[ "$ENV_PSRAM" =~ ^(2M|4M|8M|16M|32M)$ ]] && ENV_PSRAM="-m $ENV_PSRAM" || ENV_PSRAM=""
 
+QEMU_GLOBALS="-global driver=timer.$ENV_CHIP.timg,property=wdt_disable,value=true"
+
 case "$ENV_CHIP" in
     "esp32")
         QEMU_BIN=$QEMU_XTENSA_BIN
@@ -51,6 +53,7 @@ case "$ENV_CHIP" in
     "esp32p4")
         QEMU_BIN=$QEMU_RISCV_BIN
         ENV_BOOTLOADER_ADDR=0x2000
+        QEMU_GLOBALS=""
         # QEMU_ARGS="-M esp32p4"
         # QEMU_BOOT_MODE_ARGS="-global driver=esp32p4.gpio,property=strap_mode,value=0x02"
         ;;
@@ -172,12 +175,11 @@ _debug "$QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=$QEMU_FLA
 log_file=./logs.txt
 
 # run and detach
-if [[ "$ENV_CHIP" == "esp32p4" ]]; then
-  ($QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=$QEMU_FLASH_IMAGE,if=mtd,format=raw | tee -a $log_file) &
-else
-  ($QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=$QEMU_FLASH_IMAGE,if=mtd,format=raw -global driver=timer.$ENV_CHIP.timg,property=wdt_disable,value=true | tee -a $log_file) &
-
-fi
+#if [[ "$ENV_CHIP" == "esp32p4" ]]; then
+  ($QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=$QEMU_FLASH_IMAGE,if=mtd,format=raw $QEMU_GLOBALS | tee -a $log_file) &
+#else
+#  ($QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=$QEMU_FLASH_IMAGE,if=mtd,format=raw -global driver=timer.$ENV_CHIP.timg,property=wdt_disable,value=true | tee -a $log_file) &
+#fi
 
 # TODO: validate $ENV_TIMEOUT_INT_RE
 #
