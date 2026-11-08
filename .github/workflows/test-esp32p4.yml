@@ -35,7 +35,7 @@ jobs:
         with:
           debug: true
           chip: esp32p4
-          psram: 2M
+          # psram: 2M
           qemu-timeout: 15
           build-folder: test/build
           partitions-csv: partitions.csv

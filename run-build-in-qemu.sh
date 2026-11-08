@@ -53,7 +53,6 @@ case "$ENV_CHIP" in
     "esp32p4")
         QEMU_BIN=$QEMU_RISCV_BIN
         ENV_BOOTLOADER_ADDR=0x2000
-        # QEMU_GLOBALS="-global driver=$ENV_CHIP.gpio,property=strap_mode,value=0x02"
         # QEMU_ARGS="-M esp32p4"
         # QEMU_BOOT_MODE_ARGS="-global driver=esp32p4.gpio,property=strap_mode,value=0x02"
         ;;
@@ -226,41 +225,3 @@ else
 fi
 
 killall `basename $QEMU_BIN` || true
-
-
-if [[ "$ENV_CHIP" == "esp32p4" ]]; then
-
-  ELF_FILE=$(find $ENV_BUILD_FOLDER -name "*.ino.elf" -print -quit)
-  ADDR2LINE=$(find ~/.arduino15/packages/esp32/tools/ -name "riscv32-esp-elf-addr2line" -print -quit)
-
-  if [ -z "$ELF_FILE" ] || [ -z "$ADDR2LINE" ]; then
-    echo "❌ Critical Error: Toolchain binaries missing."
-    exit 1
-  fi
-
-  if grep -q "MCAUSE" $log_file; then
-    echo "⚠️ Crash Signature Found! Resolving registers..."
-
-    # Extract the exact faulting execution vector address directly from the INTLEVEL location
-    FAULT_ADDR=$(grep "INTLEVEL" $log_file | awk -F'INTLEVEL:' '{print $2}' | awk '{print $1}')
-
-    # Also try to grab the last valid Return Address (RA) from the text data chunk if present
-    RA_ADDR=$(grep -oE "4ffbcd[0-9a-fA-F]: [0-9a-fA-F]{8} [0-9a-fA-F]{8} [0-9a-fA-F]{8} [0-9a-fA-F]{8}" $log_file | awk '{print $5}' | head -n 1)
-
-    echo "=================== DECODED CRASH LOCATION ==================="
-    if [ -n "$FAULT_ADDR" ]; then
-      echo "💥 Exact instruction causing the crash ($FAULT_ADDR):"
-      $ADDR2LINE -pfi -e "$ELF_FILE" "$FAULT_ADDR"
-    fi
-
-    if [ -n "$RA_ADDR" ]; then
-      echo ""
-      echo "↩️ Likely returning/parent function ($RA_ADDR):"
-      $ADDR2LINE -pfi -e "$ELF_FILE" "$RA_ADDR"
-    fi
-    echo "=============================================================="
-  else
-    echo "✅ No Guru Meditation error found in the emulation log."
-  fi
-
-fi
