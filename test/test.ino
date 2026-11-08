@@ -1,10 +1,10 @@
 
 void setup()
 {
-  Serial.begin( 115200 );
-  Serial.println("Hello World!");
+  //Serial.begin( 115200 );
+  //Serial.println("Hello World!");
   delay(1000);
-  Serial.println("Testing log levels");
+  //Serial.println("Testing log levels");
   log_n("Hello World!");
   log_e("Hello World!");
   log_w("Hello World!");
@@ -22,14 +22,15 @@ void setup()
 
 void loop()
 {
-  Serial.println("Hello World!");
+  //Serial.println("Hello World!");
   delay(1000);
 
   static int count = 0;
   count++;
 
   if( count == 10 ) {
-    Serial.println("Test Complete, now halting!");
+    //Serial.println("Test Complete, now halting!");
+    log_n("Test Complete, now halting!");
     while(1) delay(1);
   }
 }
