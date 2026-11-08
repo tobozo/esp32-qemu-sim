@@ -172,8 +172,10 @@ runs:
         overwrite: true
         path: |
           ./logs.txt
-          ${{ inputs.build-folder }}/*.bin
-          ${{ inputs.build-folder }}/*.csv
-          ${{ inputs.build-folder }}/*.elf
+          ${{ inputs.build-folder }}
           ${{ inputs.flash-image }}
+
+        # ${{ inputs.build-folder }}/*.bin
+        # ${{ inputs.build-folder }}/*.csv
+        # ${{ inputs.build-folder }}/*.elf
 
