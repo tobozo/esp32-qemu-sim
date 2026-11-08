@@ -24,8 +24,6 @@ jobs:
         with:
           platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           arduino-board-fqbn: esp32:esp32:esp32p4:FlashMode=dio,FlashSize=4M,ChipVariant=postv3
-          # enable debug flags in ELF
-          extra-arduino-cli-args: --build-property build.code_debug=1 --build-property build.extra_flags=-g3
           arduino-platform: esp32:esp32@3.3.12
           sketch-names: ${{ env.SKETCH_NAME }}
           set-build-path: true # build in the sketch folder
