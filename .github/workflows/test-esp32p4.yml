@@ -23,7 +23,7 @@ jobs:
         uses: ArminJo/arduino-test-compile@v3
         with:
           platform-url: https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
-          arduino-board-fqbn: esp32:esp32:esp32p4:FlashMode=dio,FlashSize=4M,DebugLevel=debug,USBMode=default,CDCOnBoot=default,MSCOnBoot=default,DFUOnBoot=default,UploadMode=default,FlashFreq=80,PartitionScheme=default,PSRAM=disabled,EraseFlash=none,JTAGAdapter=default,ChipVariant=prev3
+          arduino-board-fqbn: esp32:esp32:esp32p4:FlashMode=dio,FlashSize=4M,DebugLevel=debug,PSRAM=enabled,ChipVariant=prev3
           arduino-platform: esp32:esp32@3.3.12
           sketch-names: ${{ env.SKETCH_NAME }}
           set-build-path: true # build in the sketch folder

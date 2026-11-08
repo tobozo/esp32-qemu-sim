@@ -1,4 +1,4 @@
-#!/bin/bash
+# #!/bin/bash
 
 # run-build-in-qemu.sh
 # Bash script to a run an esp32 compiled binary in QEmu and capture the outptut
@@ -172,7 +172,12 @@ _debug "$QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=$QEMU_FLA
 log_file=./logs.txt
 
 # run and detach
-($QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=$QEMU_FLASH_IMAGE,if=mtd,format=raw -global driver=timer.$ENV_CHIP.timg,property=wdt_disable,value=true | tee -a $log_file) &
+if [[ "$ENV_CHIP" == "esp32p4" ]]; then
+  ($QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=$QEMU_FLASH_IMAGE,if=mtd,format=raw | tee -a $log_file) &
+else
+  ($QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=$QEMU_FLASH_IMAGE,if=mtd,format=raw -global driver=timer.$ENV_CHIP.timg,property=wdt_disable,value=true | tee -a $log_file) &
+
+fi
 
 # TODO: validate $ENV_TIMEOUT_INT_RE
 #
