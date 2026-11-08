@@ -24,7 +24,7 @@ Use `tobozo/esp32-qemu-sim` github action to run an esp32 compiled binary in [QE
 
 ### Chip name
 
-Supported chips are: `esp32`, `esp32s3`, `esp32c3`.
+Supported chips are: `esp32`, `esp32s3`, `esp32c3`, `esp32p4 (v3.00 or newer)`.
 
 ```yaml
   with:
