@@ -26,7 +26,7 @@ function exit_with_error { echo "$1"; exit 1; }
 echo "[INFO] Validating target chip"
 
 # TODO query `$QEMU_BIN -machine ? | grep esp32` and compare
-[[ "$ENV_CHIP" =~ ^esp32(c3|s3)?$ ]] || exit_with_error "Invalid chip name, valid names are: esp32, esp32c3, esp32s3"
+[[ "$ENV_CHIP" =~ ^esp32(c3|s3|p4)?$ ]] || exit_with_error "Invalid chip name, valid names are: esp32, esp32c3, esp32s3, esp32p4 (experimental)"
 [[ "$ENV_PSRAM" =~ ^(2M|4M|8M|16M|32M)$ ]] && ENV_PSRAM="-m $ENV_PSRAM" || ENV_PSRAM=""
 
 case "$ENV_CHIP" in
@@ -45,6 +45,12 @@ case "$ENV_CHIP" in
     "esp32c3")
         QEMU_BIN=$QEMU_RISCV_BIN
         ENV_BOOTLOADER_ADDR=0x0
+        # QEMU_ARGS="-M esp32c3"
+        # QEMU_BOOT_MODE_ARGS="-global driver=esp32c3.gpio,property=strap_mode,value=0x02"
+        ;;
+    "esp32p4")
+        QEMU_BIN=$QEMU_RISCV_BIN
+        ENV_BOOTLOADER_ADDR=0x2000
         # QEMU_ARGS="-M esp32c3"
         # QEMU_BOOT_MODE_ARGS="-global driver=esp32c3.gpio,property=strap_mode,value=0x02"
         ;;
@@ -151,6 +157,7 @@ else
     $FIRMWARE_ADDR $ENV_BUILD_FOLDER/$ENV_FIRMWARE_BIN \
     $SPIFFS_ADDR $ENV_BUILD_FOLDER/$ENV_SPIFFS_BIN
 
+  # TODO: make sure the last command succeeded (e.g. no python error)
 
 fi
 
