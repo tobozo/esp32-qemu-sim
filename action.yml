@@ -85,18 +85,24 @@ runs:
   using: "composite"
   steps:
 
+    - name: Show runner image info
+      run: |
+        echo "Image release: $ImageVersion"
+        echo "Image release URL: $ImageOS"
+
+
     # QEmu takes ~4mn to build, check if a previous build has been cached
     - name: Cache QEmu build
       uses: actions/cache@v6
       id: cache-qemu
       with:
         path: './qemu-git'
-        key: qemu-system-${{ inputs.chip }}
+        key: qemu-system-${{ inputs.chip }}-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
           ${{ runner.os }}-qemu-
 
     # If no cached build exists, checkout qemu-xtensa
-    - name: Checkout qemu-xtensa with flash size fix
+    - name: Checkout qemu-xtensa
       if: steps.cache-qemu.outputs.cache-hit != 'true'
       uses: actions/checkout@v7
       with:
