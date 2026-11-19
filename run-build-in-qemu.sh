@@ -236,8 +236,9 @@ else
 fi
 
 # kill QEMU
-kill -INT "$QEMU_PID" 2>/dev/null || true
-wait "$QEMU_PID" 2>/dev/null || true
+killall `basename $QEMU_BIN` 2>/dev/null || true
+# kill -INT "$QEMU_PID" 2>/dev/null || true
+# wait "$QEMU_PID" 2>/dev/null || true
 
 # check the serial logs for crashes
 if [[ "$ENV_TIMEOUT_FAIL_RE" != "" ]]; then
