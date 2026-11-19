@@ -24,8 +24,12 @@ inputs:
     default: "60"
 
   timeout-interrupt-regex:
-    description: "Interrupt string"
+    description: "Interrupt string (success)"
     default: ""
+
+  timeout-fail-regex:
+    description: "Interrupt string (fail)"
+    default: "panicked|panic:|exception|guru meditation"
 
   # Path to merged binary, overrides all subsequent inputs
 
@@ -150,6 +154,7 @@ runs:
         ENV_PSRAM: ${{ inputs.psram }}
         ENV_QEMU_TIMEOUT : ${{ inputs.qemu-timeout }}
         ENV_TIMEOUT_INT_RE: ${{ inputs.timeout-interrupt-regex }}
+        ENV_TIMEOUT_FAIL_RE: ${{ inputs.timeout-fail-regex }}
         ENV_FLASH_IMAGE: ${{ inputs.flash-image }}
         ENV_BUILD_FOLDER : ${{ inputs.build-folder }}
         ENV_BOOTLOADER_BIN : ${{ inputs.bootloader-bin }}

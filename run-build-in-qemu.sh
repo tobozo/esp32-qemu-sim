@@ -63,7 +63,6 @@ esac
 
 [[ ! -f "$QEMU_BIN" ]] && exit_with_error "qemu binary is missing for $ENV_CHIP"
 
-
 if [[ "$ENV_FLASH_IMAGE" != "" ]]; then
 
   [[ ! -f "$ENV_FLASH_IMAGE" ]]  && exit_with_error "Flash image not found: $ENV_FLASH_IMAGE"
@@ -175,6 +174,8 @@ log_file=./logs.txt
 
 # run and detach
 ($QEMU_BIN -nographic -machine $ENV_CHIP $ENV_PSRAM -drive file=$QEMU_FLASH_IMAGE,if=mtd,format=raw $QEMU_GLOBALS | tee -a $log_file) &
+# get pid from last detached process
+QEMU_PID=$!
 
 # TODO: validate $ENV_TIMEOUT_INT_RE
 #
@@ -199,18 +200,25 @@ log_file=./logs.txt
 #       exit(0); // OK
 #     exit(1); // FAIL
 
+# success and failure should both trigger the interrupt
+if [[ "$ENV_TIMEOUT_INT_RE" != "" && "$ENV_TIMEOUT_FAIL_RE" != "" ]]; then
+  ENV_TIMEOUT_INT_RE="$ENV_TIMEOUT_INT_RE|$ENV_TIMEOUT_FAIL_RE"
+fi
+
 if [[ "$ENV_TIMEOUT_INT_RE" != "" ]]; then
 
   _debug "Timing out in $ENV_QEMU_TIMEOUT seconds unless output matches '$ENV_TIMEOUT_INT_RE'"
 
   timeout=$ENV_QEMU_TIMEOUT
+
+  # TODO: user defined interval
   interval=1
 
   while ((timeout > 0)); do
     sleep $interval
-    grep_result=`cat ${log_file} | grep -E "${ENV_TIMEOUT_INT_RE}"`
-    if [[ "$grep_result" =~ $ENV_TIMEOUT_INT_RE ]]; then
-      _debug "[INFO] Got interrupt signal from esp32 $timeout seconds before timeout";
+    grep -qiE "$ENV_TIMEOUT_INT_RE" $log_file 2>/dev/null && _debug "[INFO] Interrupt triggered: $timeout seconds left" && break
+    if ! kill -0 "$QEMU_PID" 2>/dev/null; then
+      exit_with_error "[error] QEMU exited prematurely"
       break
     fi
     ((timeout -= interval))
@@ -227,4 +235,13 @@ else
 
 fi
 
-killall `basename $QEMU_BIN` || true
+# kill QEMU
+kill -INT "$QEMU_PID" 2>/dev/null || true
+wait "$QEMU_PID" 2>/dev/null || true
+
+# check the serial logs for crashes
+if [[ "$ENV_TIMEOUT_FAIL_RE" != "" ]]; then
+  if grep -qiE "${ENV_TIMEOUT_FAIL_RE}" $log_file; then
+    exit_with_error "[error] fail signature found in logs"
+  fi
+fi
