@@ -216,6 +216,9 @@ if [[ "$ENV_TIMEOUT_INT_RE" != "" ]]; then
     ((timeout -= interval))
   done
 
+  # let the logs fill in a little more in case a crash occured
+  sleep $interval
+
 else
 
   _debug "Timing out in $ENV_QEMU_TIMEOUT seconds"
