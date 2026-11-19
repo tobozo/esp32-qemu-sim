@@ -90,6 +90,7 @@ runs:
       run: |
         echo "Image release: $ImageVersion"
         echo "Image release URL: $ImageOS"
+        echo "OS_SIG=$ImageOS-$ImageVersion" >> $GITHUB_ENV
 
 
     # QEmu takes ~4mn to build, check if a previous build has been cached
@@ -98,9 +99,9 @@ runs:
       id: cache-qemu
       with:
         path: './qemu-git'
-        key: qemu-system-${{ inputs.chip }}-${{ hashFiles('**/Package.resolved') }}
+        key: ${{ env.OS_SIG }}-qemu-${{ inputs.chip }}
         restore-keys: |
-          ${{ runner.os }}-qemu-
+          ${{ env.OS_SIG }}-qemu-
 
     # If no cached build exists, checkout qemu-xtensa
     - name: Checkout qemu-xtensa
@@ -134,9 +135,9 @@ runs:
       uses: actions/cache@v6
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        key: ${{ env.OS_SIG }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
-          ${{ runner.os }}-pip-
+          ${{ env.OS_SIG }}-pip-
 
     # Upgrade pip and install pyserial
     - name: Setup pyserial
