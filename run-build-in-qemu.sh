@@ -208,7 +208,7 @@ if [[ "$ENV_TIMEOUT_INT_RE" != "" ]]; then
 
   while ((timeout > 0)); do
     sleep $interval
-    grep_result=`tail ${log_file} | grep "${ENV_TIMEOUT_INT_RE}"`
+    grep_result=`tail ${log_file} | grep -E "${ENV_TIMEOUT_INT_RE}"`
     if [[ "$grep_result" =~ $ENV_TIMEOUT_INT_RE ]]; then
       _debug "[INFO] Got interrupt signal from esp32 $timeout seconds before timeout";
       break
