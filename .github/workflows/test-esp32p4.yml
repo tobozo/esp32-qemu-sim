@@ -4,7 +4,7 @@ on: [push,workflow_dispatch]
 jobs:
   hello_world_job:
 
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-22.04
     name: A job to say hello
 
     env:
@@ -17,6 +17,7 @@ jobs:
         run: |
           echo "Image release: $ImageVersion"
           echo "Image release URL: $ImageOS"
+
 
       - name: Checkout ESP32 project
         uses: actions/checkout@v7
