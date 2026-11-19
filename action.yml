@@ -86,6 +86,7 @@ runs:
   steps:
 
     - name: Show runner image info
+      shell: bash
       run: |
         echo "Image release: $ImageVersion"
         echo "Image release URL: $ImageOS"
